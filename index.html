@@ -125,21 +125,42 @@
             z-index: 100;
             gap: 16px;
             box-shadow: var(--shadow-md);
+            transition: opacity 0.5s ease;
         }
         body.light-theme .navbar {
             background: rgba(240, 244, 248, 0.95);
         }
-        .navbar-title { font-weight: 600; font-size: 1rem; letter-spacing: 1px; color: var(--accent-primary); text-transform: uppercase; flex: 1; }
+        .navbar-title { 
+            font-weight: 600; font-size: 1.1rem; letter-spacing: 1px; color: var(--accent-primary); 
+            text-transform: uppercase; flex: 1; display: flex; align-items: center; gap: 10px;
+        }
+        .navbar-title img { max-height: 45px; border-radius: 8px; object-fit: contain; }
         .navbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
         /* ============================================
            VISTAS PRINCIPALES
            ============================================ */
-        #scan-view, #parent-view, #register-view {
+        #scan-view, #parent-view, #register-view, #home-view {
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 24px; overflow-y: auto; animation: fade-in 0.4s ease-out;
         }
-        #scan-view, #register-view { display: none; }
+        #scan-view, #parent-view, #register-view { display: none; }
+
+        /* VISTA HOME (IDLE) */
+        #home-view {
+            background: transparent;
+        }
+        .home-clock {
+            font-size: 5.5rem; font-weight: 800; color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 8px 30px rgba(0, 0, 0, 0.7); margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .home-subtitle {
+            font-size: 1.2rem; color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.5); padding: 12px 28px; border-radius: 30px;
+            backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1);
+        }
 
         /* ============================================
            TARJETAS MINIMALISTAS
@@ -258,9 +279,7 @@
         .status-badge { padding: 4px 8px; border-radius: var(--radius-sm); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
         .status-in { background: rgba(0, 255, 136, 0.15); color: var(--accent-success); border: 1px solid rgba(0, 255, 136, 0.3); }
         .status-none { background: rgba(255, 68, 68, 0.15); color: var(--accent-danger); border: 1px solid rgba(255, 68, 68, 0.3); }
-        .face-yes { color: var(--accent-primary); font-weight: bold; }
-        .face-no { color: var(--text-muted); }
-
+        
         /* SCROLLBAR */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-card); }
@@ -281,18 +300,25 @@
 </head>
 <body>
 
-    <!-- INPUT OCULTO PARA SUBIR FOTO DE FONDO -->
+    <!-- INPUTS OCULTOS PARA FONDOS Y LOGOS -->
     <input type="file" id="bgUploader" accept="image/*" style="display:none;" onchange="procesarSubidaFondo(event)">
+    <input type="file" id="logoUploader" accept="image/png, image/jpeg" style="display:none;" onchange="procesarSubidaLogo(event)">
 
     <!-- NAVBAR -->
-    <div class="navbar no-print">
-        <div class="navbar-title">🤖 Asistencia IA</div>
+    <div class="navbar no-print" id="main-navbar">
+        <div class="navbar-title" id="nav-logo-container">🤖 Asistencia IA</div>
         <div class="navbar-actions">
             <button class="btn btn-s" onclick="mostrarVista('register-view')" title="Registro General">📝 Registrarse</button>
             <button class="btn btn-w" onclick="mostrarVista('parent-view')" title="Consulta para padres">👨‍👩‍👧 Padres/Consulta</button>
             <button class="btn btn-i" onclick="pedirClaveEscaner()" title="Acceso al escáner">📷 Escáner Facial</button>
             <button class="btn btn-m" onclick="pedirClaveMaster()" title="Panel administrativo">🔓 Admin</button>
         </div>
+    </div>
+
+    <!-- VISTA INACTIVA (HOME/LOGIN LIMPIO) -->
+    <div id="home-view" onclick="mostrarVista('parent-view')">
+        <div class="home-clock" id="home-clock-time">--:--</div>
+        <div class="home-subtitle">👆 Toque la pantalla o navegue en el menú superior para empezar</div>
     </div>
 
     <!-- VISTA DE REGISTRO MULTI-PERFIL -->
@@ -414,7 +440,8 @@
             <h1>⚙️ Administración</h1>
             <div class="panel-header-actions">
                 <button class="btn btn-s" onclick="editarNumeroJunta()">📱 TEL</button>
-                <button class="btn btn-i" onclick="cambiarFondoUpload()">🖼️ SUBIR FONDO</button>
+                <button class="btn btn-i" onclick="document.getElementById('bgUploader').click()">🖼️ FONDO</button>
+                <button class="btn btn-m" onclick="document.getElementById('logoUploader').click()">🎨 LOGO</button>
                 <button class="btn btn-w" onclick="cambiarPasswordMaster()">🔑 CLAVE ADMIN</button>
                 <button class="btn btn-w" style="background-color: #6d28d9; border-color: #6d28d9;" onclick="cambiarPasswordEscaner()">📷 CLAVE ESCÁNER</button>
                 <button class="btn btn-m" onclick="mostrarEstadisticas()">📈 STATS</button>
@@ -495,7 +522,7 @@
         <div id="sec-geolocalizacion" style="display:none;">
             <div class="power-bar">
                 <h3 style="color: var(--accent-primary); margin-bottom: 10px;">📍 Configuración de Geocerca del Centro Educativo</h3>
-                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 15px;">Establece las coordenadas del centro para identificar y registrar si algún estudiante escanea asistencia lejos del establecimiento.</p>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 15px;">Establece las coordenadas del centro. <b>Si un escaneo supera el radio, se registrará el intento pero NO se marcará su asistencia real.</b></p>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                     <div>
@@ -514,7 +541,7 @@
                 <button class="btn btn-s" style="margin-top: 15px;" onclick="guardarConfigGeo()">💾 Guardar Geocerca</button>
             </div>
 
-            <h2 style="color:var(--accent-primary); margin: 25px 0 10px 0;">🌍 Historial de Escaneos Lejanos Detectados</h2>
+            <h2 style="color:var(--accent-primary); margin: 25px 0 10px 0;">🌍 Historial de Escaneos Lejanos Detectados (Rechazados)</h2>
             <div style="overflow-x: auto;">
                 <table>
                     <thead>
@@ -524,7 +551,7 @@
                             <th>Nombre Alumno</th>
                             <th>Distancia Calculada</th>
                             <th>Coordenadas Dispositivo</th>
-                            <th class="no-print">Mapa</th>
+                            <th class="no-print">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tablaLogsLejanos"></tbody>
@@ -601,10 +628,60 @@
             document.body.classList.add('light-theme');
         }
 
-        // Cargar imagen de fondo si existe
+        // Cargar imagen de fondo y logo si existen
         if(localStorage.getItem('CUSTOM_BG')) {
             document.body.style.backgroundImage = `url(${localStorage.getItem('CUSTOM_BG')})`;
         }
+        
+        function cargarLogoPersonalizado() {
+            const logoBase64 = localStorage.getItem('CUSTOM_LOGO');
+            const navContainer = document.getElementById('nav-logo-container');
+            if(logoBase64) {
+                navContainer.innerHTML = `<img src="${logoBase64}" alt="Logo Oficial">`;
+            } else {
+                navContainer.innerHTML = `🤖 Asistencia IA`;
+            }
+        }
+        cargarLogoPersonalizado();
+
+        // ============================================
+        // SISTEMA DE INACTIVIDAD (IDLE) - FONDO DE PANTALLA
+        // ============================================
+        let idleTimeout;
+        const IDLE_TIME = 45000; // 45 Segundos de inactividad
+
+        function resetIdleTimer() {
+            clearTimeout(idleTimeout);
+            
+            // Solo activar el fondo de pantalla inactivo si no está el escaner principal corriendo 
+            // y no hay paneles de administrador activos
+            if(!scannerActivo && !queryScannerActivo && 
+               document.getElementById('master-panel').style.display !== 'block' && 
+               document.getElementById('face-modal').style.display !== 'flex') {
+                
+                idleTimeout = setTimeout(() => {
+                    mostrarVista('home-view');
+                }, IDLE_TIME);
+            }
+        }
+
+        // Detectar cualquier interacción del usuario para salir o reiniciar modo reposo
+        ['mousemove', 'touchstart', 'click', 'keydown', 'scroll'].forEach(evt => {
+            document.addEventListener(evt, resetIdleTimer);
+        });
+
+        // Reloj del modo Inactivo
+        function updateIdleClock() {
+            const now = new Date();
+            let h = now.getHours(); let m = now.getMinutes();
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12; h = h ? h : 12;
+            m = m < 10 ? '0' + m : m;
+            const clockEl = document.getElementById('home-clock-time');
+            if(clockEl) clockEl.innerText = h + ':' + m + ' ' + ampm;
+            setTimeout(updateIdleClock, 5000);
+        }
+        updateIdleClock();
 
         // ============================================
         // SISTEMA AVANZADO DE SONIDOS MELÓDICOS (AudioContext)
@@ -976,6 +1053,7 @@
                     const hISO = new Date().toLocaleDateString('sv-SE');
                     const esLejano = dist > geoConfig.radio;
 
+                    // NUEVO REQUERIMIENTO: Filtrar a los que estén fuera del rango y rechazar su asistencia
                     if (esLejano) {
                         database.ref('logs_lejanos').push({
                             id: id,
@@ -985,8 +1063,15 @@
                             lat: latDisp,
                             lng: lngDisp
                         });
+                        
+                        mostrarMensajeTemp("⚠️ Fuera del rango. Escaneo detectado (" + Math.round(dist) + "m) pero NO registrado.", "var(--accent-danger)");
+                        playErrorSound();
+                        
+                        if(scannerActivo) toggleScanner();
+                        return; // Se aborta el registro de la asistencia oficial
                     }
 
+                    // Solo llega aquí si está dentro de la geocerca
                     completarEscaneoBD(id, hISO, esLejano, dist, strEmocion, emoticon);
                 }, (err) => {
                     console.log("No se pudo obtener geolocalización:", err.message);
@@ -1029,8 +1114,7 @@
             res.style.display = 'block'; 
             res.style.background = tipo === "ENTRADA" ? "rgba(0, 255, 136, 0.1)" : "rgba(255, 68, 68, 0.1)";
             
-            let alertaLejos = esLejano ? ` <span style="color: var(--accent-danger); font-size:0.85rem;"><br>⚠️ Escaneo Lejano (${Math.round(dist)}m)</span>` : "";
-            document.getElementById('resNombre').innerHTML = "✅ " + db.personas[id].nombre + alertaLejos; 
+            document.getElementById('resNombre').innerHTML = "✅ " + db.personas[id].nombre; 
             document.getElementById('resMov').innerHTML = (tipo === "ENTRADA" ? "Entrada" : "Salida") + ` Registrada <span style="font-size:1.5rem;" title="${strEmocion}">${emoticon}</span>`;
             
             if(scannerActivo) toggleScanner();
@@ -1042,7 +1126,7 @@
             const status = document.getElementById('scan-ai-status');
             if(status) {
                 const old = status.innerText; status.innerText = msg; status.style.color = color;
-                setTimeout(() => { status.innerText = old; status.style.color = "var(--accent-warning)"; }, 3500);
+                setTimeout(() => { status.innerText = old; status.style.color = "var(--accent-warning)"; }, 4500);
             }
         }
 
@@ -1065,12 +1149,14 @@
                     scannerActivo = true;
                     video.addEventListener('play', loopReconocimiento);
                     actualizarEstadoIA("👁️ Escáner Activo. Alumno/Personal mire a la cámara.");
+                    resetIdleTimer();
                 } catch (err) { alert("Error al acceder a la cámara."); }
             } else {
                 detenerCamaras();
                 container.classList.remove('active', 'scanning');
                 btn.innerText = "🟢 Iniciar Escáner"; btn.classList.replace('btn-d', 'btn-i');
                 scannerActivo = false; actualizarEstadoIA("IA en espera.");
+                resetIdleTimer();
             }
         }
 
@@ -1082,7 +1168,6 @@
             const displaySize = { width: video.clientWidth, height: video.clientHeight };
             faceapi.matchDimensions(canvas, displaySize);
             
-            // Integrando withFaceExpressions para determinar el estado de ánimo
             const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceExpressions().withFaceDescriptor();
             
             const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1145,12 +1230,14 @@
                     queryScannerActivo = true;
                     video.addEventListener('play', loopConsultaFacial);
                     actualizarEstadoIA("👁️ Analizando rostro...");
+                    resetIdleTimer();
                 } catch (err) { alert("Error al acceder a la cámara."); }
             } else {
                 detenerCamaras();
                 container.classList.remove('active', 'scanning');
                 btn.innerText = "📷 Iniciar Consulta por Rostro"; btn.classList.replace('btn-d', 'btn-m');
                 queryScannerActivo = false;
+                resetIdleTimer();
             }
         }
 
@@ -1257,6 +1344,7 @@
                 streamActual = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 const video = document.getElementById('reg-video'); video.srcObject = streamActual;
                 video.addEventListener('play', loopCapturaAdmin);
+                resetIdleTimer();
             } catch (err) { alert("Error con la cámara."); cerrarFaceModal(); }
         }
 
@@ -1293,7 +1381,7 @@
                 cerrarFaceModal(); construirFaceMatcher();
             }
         }
-        function cerrarFaceModal() { document.getElementById('face-modal').style.display = 'none'; detenerCamaras(); idCapturaActual = null; descriptorDetectado = null; }
+        function cerrarFaceModal() { document.getElementById('face-modal').style.display = 'none'; detenerCamaras(); idCapturaActual = null; descriptorDetectado = null; resetIdleTimer(); }
 
         // ============================================
         // FUNCIONES DE ADMINISTRADOR Y TABLAS
@@ -1348,6 +1436,7 @@
             });
         }
 
+        // TABLA: Historial de Escaneos Lejanos
         function renderGeolocalizacion() {
             const tbody = document.getElementById('tablaLogsLejanos');
             tbody.innerHTML = "";
@@ -1364,21 +1453,26 @@
                         <td style="color: var(--accent-danger); font-weight:bold;">${log.distancia} metros fuera del rango</td>
                         <td>${log.lat.toFixed(6)}, ${log.lng.toFixed(6)}</td>
                         <td class="no-print">
-                            <button class="btn btn-i" style="padding: 4px 8px; font-size: 0.75rem;" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${log.lat},${log.lng}', '_blank')">🗺️ Ver Mapa</button>
+                            <div style="display:flex; gap: 5px;">
+                                <button class="btn btn-i" style="padding: 4px 8px; font-size: 0.75rem;" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${log.lat},${log.lng}', '_blank')">🗺️ Ver Mapa</button>
+                                <button class="btn btn-d" style="padding: 4px 8px; font-size: 0.75rem;" onclick="eliminarLogLejano('${log.key}')">🗑️ Eliminar</button>
+                            </div>
                         </td>
                     </tr>
                 `);
             });
         }
 
+        function eliminarLogLejano(key) {
+            if(confirm("¿Está seguro de que desea eliminar permanentemente este registro de escaneo lejano?")) {
+                database.ref('logs_lejanos/' + key).remove();
+                alert("Registro lejano eliminado con éxito.");
+            }
+        }
+
         // --- Botones Superiores de Administración ---
         function editarNumeroJunta() { let n = prompt("Número de contacto general para WhatsApp:", NUMERO_OFICIAL_JUNTA); if(n) { database.ref('config/numeroOficial').set(n); alert("Actualizado."); } }
         
-        // MODIFICADO: Subida de Foto del Dispositivo con Compresión
-        function cambiarFondoUpload() { 
-            document.getElementById('bgUploader').click(); 
-        }
-
         function procesarSubidaFondo(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1387,26 +1481,50 @@
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    let w = img.width;
-                    let h = img.height;
-                    const maxW = 1920; // Redimensionar si es muy grande para no bloquear localStorage
-                    if (w > maxW) {
-                        h = Math.round(h * maxW / w);
-                        w = maxW;
-                    }
-                    canvas.width = w;
-                    canvas.height = h;
+                    let w = img.width; let h = img.height;
+                    const maxW = 1920; 
+                    if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+                    canvas.width = w; canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
                     
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.6); // Compresión al 60%
-                    
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.6); 
                     try {
                         localStorage.setItem('CUSTOM_BG', dataUrl);
                         document.body.style.backgroundImage = `url(${dataUrl})`;
                         alert('Fondo de pantalla actualizado con éxito desde su dispositivo.');
                     } catch(err) {
                         alert('La imagen es demasiado pesada para el navegador. Intente subir una foto de menor calidad.');
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function procesarSubidaLogo(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    // Reducir tamaño del logo para evitar límites de almacenamiento en Base64
+                    let w = img.width; let h = img.height;
+                    const maxH = 200;
+                    if(h > maxH) { w = Math.round(w * maxH / h); h = maxH; }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+
+                    const dataUrl = canvas.toDataURL('image/png', 0.8);
+                    try {
+                        localStorage.setItem('CUSTOM_LOGO', dataUrl);
+                        cargarLogoPersonalizado();
+                        alert('Logo institucional actualizado correctamente.');
+                    } catch(err) {
+                        alert('La imagen del logo excede el límite permitido. Intente con una imagen más liviana.');
                     }
                 };
                 img.src = e.target.result;
@@ -1435,7 +1553,7 @@
                     <hr style="margin: 15px 0;">
                     <p><b>Institución:</b> Escuela La Carpio</p>
                     <p><b>Licencia:</b> prodigital-72284602</p>
-                    <p><b>Versión:</b> Sistema Facial Inteligente 3.0</p>
+                    <p><b>Versión:</b> Sistema Facial Inteligente 3.5 (Geocerca Activa)</p>
                 </div>
             `;
             let win = window.open("", "Configuración de Sistema", "width=400,height=300");
@@ -1470,7 +1588,7 @@
             }
             geoConfig = { lat, lng, radio };
             database.ref('config/geocerca').set(geoConfig);
-            alert("Ubicación y Geocerca configuradas de forma exitosa.");
+            alert("Ubicación y Geocerca configuradas de forma exitosa.\n\nRecuerde: Ahora cualquier escaneo que exceda el radio será almacenado en el 'Historial Lejano' y su Asistencia Oficial será rechazada.");
         }
 
         // --- Barra de Herramientas Miembros ---
@@ -1583,10 +1701,13 @@
         // VISTAS Y REPORTES
         // ============================================
         function mostrarVista(id) { 
+            // Vistas a ocultar/mostrar
+            document.getElementById('home-view').style.display = (id==='home-view')?'flex':'none'; 
             document.getElementById('scan-view').style.display = (id==='scan-view')?'flex':'none'; 
             document.getElementById('parent-view').style.display = (id==='parent-view')?'flex':'none'; 
             document.getElementById('register-view').style.display = (id==='register-view')?'flex':'none'; 
             
+            // Apagar la cámara si cerramos su respectiva vista
             if(id!=='scan-view' && scannerActivo) toggleScanner(); 
             if(id!=='parent-view' && queryScannerActivo) toggleQueryScanner(); 
             if(id!=='register-view' && regStream) { 
@@ -1594,11 +1715,13 @@
                 regStream = null; 
                 document.getElementById('reg-cam-container').classList.remove('active', 'scanning');
             }
+            resetIdleTimer();
         }
+
         function pedirClaveEscaner() { if(prompt("Clave:") === passEscaner) mostrarVista('scan-view'); }
-        function pedirClaveMaster() { if(prompt("Clave Admin:") === passMaster) { document.getElementById('master-panel').style.display = 'block'; inicializarIA(); } }
-        function cerrarMaster() { document.getElementById('master-panel').style.display = 'none'; detenerCamaras(); }
-        function cerrarVistaProtegida(id) { document.getElementById(id).style.display = 'none'; mostrarVista('parent-view'); detenerCamaras(); }
+        function pedirClaveMaster() { if(prompt("Clave Admin:") === passMaster) { document.getElementById('master-panel').style.display = 'block'; inicializarIA(); resetIdleTimer(); } }
+        function cerrarMaster() { document.getElementById('master-panel').style.display = 'none'; detenerCamaras(); resetIdleTimer(); }
+        function cerrarVistaProtegida(id) { document.getElementById(id).style.display = 'none'; mostrarVista('home-view'); detenerCamaras(); }
         
         function cambiarTab(n) { 
             document.getElementById('sec-alumnos').style.display = (n===1)?'block':'none'; 
@@ -1722,8 +1845,9 @@
 
         function mostrarAyuda(t) { alert("SISTEMA DE ASISTENCIA FACIAL CON GEOCERCA\n\n1. Asegúrate de estar dentro del rango geográfico configurado en la escuela.\n2. Presiona 'Iniciar Escáner'.\n3. Mire a la cámara para guardar la asistencia.\n4. El sistema emitirá una melodía de éxito y desactivará la cámara automáticamente para la siguiente persona."); }
 
-        // Inicializar vista por defecto
-        mostrarVista('parent-view');
+        // Inicializar vista por defecto en pantalla inactiva
+        mostrarVista('home-view');
+        resetIdleTimer();
     </script>
 </body>
 </html>
