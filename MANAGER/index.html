@@ -618,6 +618,32 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // ============================================
+        // 2. PEGÁS EL CÓDIGO AQUÍ (El Guardián SaaS)
+        // ============================================
+        const TENANT_ID = "escuela-la-carpio"; 
+        
+        database.ref('tenants/' + TENANT_ID + '/status').on('value', (snapshot) => {
+            const estadoSaaS = snapshot.val();
+            // Validar aislamiento del inquilino y suscripción:
+            if (estadoSaaS && estadoSaaS !== 'activo') {
+                // Destruye y bloquea por completo la plataforma si no está "activo"
+                document.body.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #0a0e27; font-family: sans-serif; padding: 20px; text-align: center;">
+                        <h1 style="color: #ff4444; font-size: 2.8rem; margin-bottom: 15px; font-weight: bold;">⚠️ Acceso Suspendido</h1>
+                        <p style="color: #a8b2c1; font-size: 1.2rem; max-width: 600px; line-height: 1.6;">
+                            El servicio asociado a este entorno (<strong>${TENANT_ID}</strong>) se encuentra temporalmente inactivo. <br><br>
+                            Por favor, contacte a soporte técnico o a la administración de SaaS para restablecer la conexión.
+                        </p>
+                    </div>
+                `;
+            }
+        });
+
+        // ============================================
+        // 3. EL RESTO DE LA LÓGICA NORMAL
+        // ============================================
+
         let db = { personas: {} };
         let logsGlobal = [];
         let logsLejanosGlobal = [];
