@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Redirigiendo Sistema...</title>
+    <script>
+        // Extraer la ruta que devolvió 404
+        var path = window.location.pathname;
+        var search = window.location.search;
+        
+        // Almacenar en estado temporal del navegador
+        sessionStorage.setItem('spa_redirect_path', path + search);
+        
+        // Detección automática de subcarpeta en GitHub Pages 
+        // (ej: /mi-repo/ENTRENADOR -> /mi-repo/)
+        var pathSegments = path.split('/');
+        var basePath = '/';
+        
+        if (pathSegments.length > 2 && window.location.hostname.includes('github.io')) {
+            basePath = '/' + pathSegments[1] + '/'; 
+        }
+        
+        // Redirigir limpiamente a la raíz del SaaS
+        window.location.replace(basePath);
+    </script>
+</head>
+<body style="background-color: #f8fafc; margin: 0; padding: 0;">
+    <div style="font-family: sans-serif; text-align: center; margin-top: 20vh; color: #64748b;">
+        <h2 style="color: #0f172a;">Iniciando módulo de la plataforma...</h2>
+        <p>Por favor espera un momento. Autenticando ruta...</p>
+    </div>
+</body>
+</html>
