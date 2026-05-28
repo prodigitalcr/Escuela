@@ -3,46 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SaaS Master Control - Administrador Prodigital</title>
+    <title>SaaS Master Control - Administrador</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- Firebase App (Compatibilidad v8) -->
+    <!-- Firebase App (Compatibilidad v8 para coincidir con el sitio principal) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
+        /* Transiciones suaves */
         .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms; }
-        /* Toggle Switch Customization */
-        .toggle-checkbox:checked { right: 0; border-color: #4f46e5; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #4f46e5; }
     </style>
 </head>
 <body class="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
 
-    <!-- CONFIGURACIÓN DE FIREBASE (¡DEBES ACTUALIZARLA!) -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBpGu9Bnr5pQhNBK4kYpoh4GuLkR4CED4c", // Reemplaza con tus credenciales reales
-            authDomain: "escuela-la-carpio.firebaseapp.com",
-            databaseURL: "https://escuela-la-carpio-default-rtdb.firebaseio.com",
-            projectId: "escuela-la-carpio",
-            storageBucket: "escuela-la-carpio.firebasestorage.app",
-            messagingSenderId: "163331007154",
-            appId: "1:163331007154:web:2465b1068d6b356cbadfab"
-        };
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const database = firebase.database();
-        const auth = firebase.auth();
-    </script>
-
-    <!-- OVERLAY DE LOGIN SAAS -->
+    <!-- OVERLAY DE LOGIN SAAS (Bloquea la vista hasta autenticar) -->
     <div id="saasLoginOverlay" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center transition-opacity duration-300">
         <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4">
             <div class="flex justify-center mb-6">
@@ -53,413 +33,573 @@
             <h2 class="text-2xl font-bold text-center text-slate-900 mb-2">Acceso Maestro SaaS</h2>
             <p class="text-center text-slate-500 text-sm mb-8">Uso exclusivo para Administración (Prodigital)</p>
             
-            <form id="loginForm" onsubmit="event.preventDefault(); iniciarSesionSaaS();">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Correo Administrador Súper Admin</label>
-                    <input type="email" id="saasEmail" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" required>
+            <form id="loginForm" onsubmit="iniciarSesionSaaS(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Correo Electrónico</label>
+                    <input type="email" id="loginEmail" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="saas@prodigital.com">
                 </div>
-                <div class="mb-6">
+                <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
-                    <input type="password" id="saasPass" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" required>
+                    <input type="password" id="loginPass" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="••••••••">
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex justify-center items-center gap-2">
-                    <i data-lucide="lock" class="w-4 h-4"></i> Ingresar al Panel
+                <button type="submit" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors mt-4">
+                    Ingresar al Panel
                 </button>
             </form>
             <p id="loginError" class="text-red-500 text-sm text-center mt-4 hidden"></p>
         </div>
     </div>
 
-    <!-- MAIN PANEL (Se muestra tras el login) -->
-    <div id="mainDashboard" class="flex w-full h-full hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0 md:static md:inset-0 flex flex-col">
+        <div class="flex items-center justify-between h-16 px-6 bg-slate-950">
+            <span class="text-xl font-bold text-white tracking-wider flex items-center gap-2">
+                <i data-lucide="server" class="w-6 h-6 text-indigo-500"></i>
+                SaaS Master
+            </span>
+            <button id="closeSidebar" class="md:hidden text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
         
-        <!-- SIDEBAR -->
-        <aside class="w-64 bg-slate-900 text-white flex flex-col shadow-xl z-10">
-            <div class="p-6 border-b border-slate-800">
-                <div class="flex items-center gap-3">
-                    <div class="bg-indigo-500 p-2 rounded-lg">
-                        <i data-lucide="layers" class="w-5 h-5 text-white"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-lg leading-tight">Prodigital</h1>
-                        <p class="text-xs text-indigo-300 font-medium tracking-wide">SaaS MASTER</p>
-                    </div>
-                </div>
-            </div>
+        <nav class="p-4 space-y-2 flex-1">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-indigo-600 text-white">
+                <i data-lucide="bar-chart" class="w-5 h-5"></i> Vista General
+            </button>
+            <button onclick="switchTab('escuelas')" id="nav-escuelas" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300">
+                <i data-lucide="building-2" class="w-5 h-5"></i> Escuelas (Inquilinos)
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-800">
+            <button onclick="cerrarSesionSaaS()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-red-900/50 text-red-400 hover:text-red-300">
+                <i data-lucide="log-out" class="w-5 h-5"></i> Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        
+        <!-- Header -->
+        <header class="flex items-center justify-between h-16 px-4 bg-white border-b border-slate-200 sm:px-6 lg:px-8 shrink-0">
+            <button id="openSidebar" class="text-slate-500 hover:text-slate-700 md:hidden">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
             
-            <nav class="flex-1 py-6 px-4 space-y-2">
-                <a href="#" onclick="mostrarSeccion('tenants')" id="nav-tenants" class="flex items-center gap-3 px-4 py-3 bg-indigo-600 rounded-xl transition-all font-medium">
-                    <i data-lucide="building-2" class="w-5 h-5"></i> Inquilinos (Tenants)
-                </a>
-                <a href="#" onclick="mostrarSeccion('global')" id="nav-global" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-800 rounded-xl transition-all font-medium text-slate-300 hover:text-white">
-                    <i data-lucide="globe" class="w-5 h-5"></i> Configuración Global
-                </a>
-            </nav>
-
-            <div class="p-4 border-t border-slate-800">
-                <button onclick="cerrarSesionSaaS()" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-800 hover:bg-red-500/20 hover:text-red-400 text-slate-300 rounded-lg transition-all text-sm font-medium">
-                    <i data-lucide="log-out" class="w-4 h-4"></i> Cerrar Sesión
-                </button>
-            </div>
-        </aside>
-
-        <!-- CONTENIDO PRINCIPAL -->
-        <main class="flex-1 flex flex-col bg-slate-50 overflow-hidden">
-            <!-- Header -->
-            <header class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center z-0 shadow-sm">
-                <h2 id="pageTitle" class="text-xl font-bold text-slate-800">Gestión de Inquilinos</h2>
+            <div class="flex-1 px-4 flex justify-end sm:justify-between items-center">
+                <div class="hidden sm:block max-w-xs w-full relative">
+                    <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                    <input type="text" id="searchInput" onkeyup="filtrarTablaEscuelas()" placeholder="Buscar escuela o ID..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                </div>
+                
                 <div class="flex items-center gap-4">
-                    <span class="text-sm font-medium text-slate-500 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Sistema Operativo
-                    </span>
-                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200">
-                        P
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm cursor-pointer shadow-md" title="Administrador SaaS">
+                        SA
                     </div>
                 </div>
-            </header>
+            </div>
+        </header>
 
-            <!-- Área de Trabajo -->
-            <div class="flex-1 overflow-auto p-8 relative">
-                
-                <!-- SECCIÓN TENANTS -->
-                <div id="sec-tenants" class="max-w-6xl mx-auto">
-                    <!-- Action Bar -->
-                    <div class="flex justify-between items-center mb-6">
-                        <div class="relative">
-                            <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" placeholder="Buscar institución..." class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none w-64 shadow-sm text-sm">
+        <!-- Content Area -->
+        <div class="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 relative">
+            
+            <!-- CONTENIDO: DASHBOARD -->
+            <div id="tab-dashboard" class="space-y-6 max-w-7xl mx-auto block">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Vista General del SaaS</h1>
+                    <p class="text-slate-500 text-sm mt-1">Métricas en tiempo real de todas tus instancias alquiladas.</p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="p-3 rounded-lg bg-indigo-100"><i data-lucide="building" class="w-6 h-6 text-indigo-600"></i></div>
+                        <div>
+                            <p class="text-sm font-medium text-slate-500">Escuelas Registradas</p>
+                            <p class="text-2xl font-bold text-slate-900" id="stat-total">0</p>
                         </div>
-                        <button onclick="abrirModalNuevoTenant()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-all shadow-sm flex items-center gap-2 text-sm">
-                            <i data-lucide="plus" class="w-4 h-4"></i> Nuevo Inquilino
-                        </button>
                     </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="p-3 rounded-lg bg-green-100"><i data-lucide="check-circle" class="w-6 h-6 text-green-600"></i></div>
+                        <div>
+                            <p class="text-sm font-medium text-slate-500">Instancias Activas</p>
+                            <p class="text-2xl font-bold text-slate-900" id="stat-active">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="p-3 rounded-lg bg-red-100"><i data-lucide="alert-triangle" class="w-6 h-6 text-red-600"></i></div>
+                        <div>
+                            <p class="text-sm font-medium text-slate-500">Clientes Morosos</p>
+                            <p class="text-2xl font-bold text-slate-900" id="stat-moroso">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="p-3 rounded-lg bg-gray-100"><i data-lucide="slash" class="w-6 h-6 text-gray-600"></i></div>
+                        <div>
+                            <p class="text-sm font-medium text-slate-500">Bloqueadas</p>
+                            <p class="text-2xl font-bold text-slate-900" id="stat-bloqueado">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    <!-- Tabla de Tenants -->
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase font-bold tracking-wider">
-                                    <th class="px-6 py-4">ID Inquilino</th>
-                                    <th class="px-6 py-4">Nombre Comercial</th>
-                                    <th class="px-6 py-4">Plan / Suscripción</th>
-                                    <th class="px-6 py-4 text-center">Estado (Kill Switch)</th>
+            <!-- CONTENIDO: ESCUELAS -->
+            <div id="tab-escuelas" class="space-y-6 max-w-7xl mx-auto hidden">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-900">Gestión de Escuelas (Inquilinos)</h1>
+                        <p class="text-slate-500 text-sm mt-1">Controla el acceso y estado de las plataformas conectadas a tu Firebase.</p>
+                    </div>
+                    <button onclick="openAddSchoolModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 shadow-sm">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Nueva Escuela
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
+                                <tr>
+                                    <th class="px-6 py-4">Institución / URL</th>
+                                    <th class="px-6 py-4">Representante / Acceso</th>
+                                    <th class="px-6 py-4">Suscripción (Inicio - Fin)</th>
+                                    <th class="px-6 py-4">Estado del Sitio</th>
                                     <th class="px-6 py-4 text-right">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="tablaTenantsBody" class="divide-y divide-slate-100">
-                                <!-- Filas generadas dinámicamente -->
+                            <tbody id="schools-table-body" class="divide-y divide-slate-100">
+                                <!-- Las filas se generan con JavaScript desde Firebase -->
                             </tbody>
                         </table>
-                        
-                        <!-- Estado de carga/vacío -->
-                        <div id="tenantsLoading" class="p-8 text-center text-slate-400">
-                            <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2 text-indigo-400"></i>
-                            Cargando datos...
-                        </div>
                     </div>
                 </div>
-
-                <!-- SECCIÓN GLOBAL (Placeholder) -->
-                <div id="sec-global" class="max-w-4xl mx-auto hidden">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center">
-                        <i data-lucide="settings-2" class="w-16 h-16 mx-auto text-slate-300 mb-4"></i>
-                        <h3 class="text-lg font-bold text-slate-700 mb-2">Configuración Global</h3>
-                        <p class="text-slate-500 mb-6">Ajustes que afectan a toda la infraestructura SaaS.</p>
-                        
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto text-left">
-                            <h4 class="font-bold text-yellow-800 mb-2 flex items-center gap-2">
-                                <i data-lucide="alert-triangle" class="w-5 h-5"></i> Modo Mantenimiento Global
-                            </h4>
-                            <p class="text-sm text-yellow-700 mb-4">Activar esto suspenderá el acceso a TODOS los inquilinos simultáneamente.</p>
-                            <button onclick="alert('Funcionalidad en desarrollo.')" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 rounded-lg transition-all shadow-sm">
-                                Activar Mantenimiento
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
             </div>
-        </main>
-    </div>
 
-    <!-- MODAL NUEVO TENANT -->
-    <div id="modalNuevoTenant" class="fixed inset-0 bg-slate-900/60 z-[200] hidden items-center justify-center backdrop-blur-sm">
-        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full mx-4 border border-slate-200">
-            <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
-                <h3 class="text-lg font-bold text-slate-800">Provisionar Nuevo Inquilino</h3>
-                <button onclick="cerrarModalNuevoTenant()" class="text-slate-400 hover:text-slate-600 transition-colors">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+        </div>
+    </main>
+
+    <!-- Modal para Agregar Escuela -->
+    <div id="addSchoolModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 flex items-center justify-center overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-xl p-6 max-w-2xl w-full mx-4 my-8 transform scale-95 opacity-0 transition-all" id="addSchoolModalContent">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-900">Registrar Nueva Institución</h3>
+                <button type="button" onclick="closeAddSchoolModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
             
-            <form onsubmit="event.preventDefault(); crearNuevoTenant();" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">ID Único (Subdominio)</label>
-                    <input type="text" id="newTenantId" placeholder="ej: colegio-los-andes" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-mono" required pattern="^[a-z0-9-]+$">
-                    <p class="text-xs text-slate-500 mt-1">Solo minúsculas, números y guiones. No editable después.</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Nombre Comercial</label>
-                    <input type="text" id="newTenantName" placeholder="Colegio Los Andes" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-sm" required>
-                </div>
-                
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mt-4">
-                    <h4 class="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                        <i data-lucide="map-pin" class="w-4 h-4 text-indigo-500"></i> Geocerca Inicial (Opcional)
-                    </h4>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1">Latitud</label>
-                            <input type="number" step="any" id="newTenantLat" placeholder="9.93" class="w-full px-3 py-1.5 border border-slate-300 rounded text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1">Longitud</label>
-                            <input type="number" step="any" id="newTenantLng" placeholder="-84.08" class="w-full px-3 py-1.5 border border-slate-300 rounded text-sm">
-                        </div>
+            <form id="addSchoolForm" onsubmit="submitNewSchool(event)" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Identificador Técnico -->
+                    <div class="space-y-1 md:col-span-2">
+                        <label class="text-sm font-medium text-slate-700">ID del Tenant (Único, ej: escuela-carpio)</label>
+                        <input type="text" id="schoolId" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-slate-50">
+                    </div>
+
+                    <!-- Institución -->
+                    <div class="space-y-1">
+                        <label class="text-sm font-medium text-slate-700">Nombre de la Institución</label>
+                        <input type="text" id="schoolName" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-sm font-medium text-slate-700">URL del Sitio Principal</label>
+                        <input type="text" id="schoolUrl" required placeholder="ej. mipagina.com o 127.0.0.1" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    </div>
+                    
+                    <!-- Representante y Acceso -->
+                    <div class="space-y-1">
+                        <label class="text-sm font-medium text-slate-700">Nombre del Representante (Director)</label>
+                        <input type="text" id="schoolRep" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-sm font-medium text-slate-700">Correo del Director</label>
+                        <input type="email" id="schoolEmail" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    </div>
+                    <div class="space-y-1 md:col-span-2">
+                        <label class="text-sm font-medium text-slate-700">Firebase UID del Director (Vinculación)</label>
+                        <input type="text" id="schoolUid" required placeholder="Ej: GhWXyBqMR4cCNhw2vOpnrTRQLbi2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    </div>
+
+                    <!-- Suscripción -->
+                    <div class="space-y-1">
+                        <label class="text-sm font-medium text-slate-700">Monto de Suscripción ($)</label>
+                        <input type="number" id="schoolAmount" required min="0" step="0.01" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-sm font-medium text-slate-700">Periodo</label>
+                        <select id="schoolPeriod" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <option value="Mensual">Mensual</option>
+                            <option value="Anual">Anual</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-sm font-medium text-slate-700">Fecha de Inicio</label>
+                        <input type="date" id="schoolStart" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-sm font-medium text-slate-700">Fecha de Vencimiento</label>
+                        <input type="date" id="schoolEnd" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                 </div>
-
-                <div class="pt-4 flex justify-end gap-3 border-t border-slate-100">
-                    <button type="button" onclick="cerrarModalNuevoTenant()" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition-colors">Cancelar</button>
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
-                        Crear y Provisionar
-                    </button>
+                
+                <div class="flex gap-3 justify-end mt-6 pt-4 border-t border-slate-200">
+                    <button type="button" onclick="closeAddSchoolModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Guardar en Firebase</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Inicializar Iconos -->
-    <script>
-        lucide.createIcons();
+    <!-- Modal de confirmación -->
+    <div id="statusModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4 transform scale-95 opacity-0 transition-all" id="modalContent">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
+                    <i data-lucide="alert-circle" class="w-6 h-6 text-yellow-600"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Cambiar estado del sitio</h3>
+            </div>
+            <p class="text-slate-600 text-sm mb-6" id="modalText">¿Estás seguro de que deseas cambiar el estado de esta escuela en la base de datos?</p>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
+                <button id="confirmStatusBtn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center gap-2">
+                    <i data-lucide="database" class="w-4 h-4"></i> Confirmar Cambio
+                </button>
+            </div>
+        </div>
+    </div>
 
-        // ==========================================
-        // LÓGICA DE AUTENTICACIÓN SAAS
-        // ==========================================
-        function iniciarSesionSaaS() {
-            const email = document.getElementById('saasEmail').value;
-            const pass = document.getElementById('saasPass').value;
-            const errEl = document.getElementById('loginError');
+    <script>
+        // ============================================
+        // CONFIGURACIÓN FIREBASE (Conectado a la BD de La Carpio)
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpGu9Bnr5pQhNBK4kYpoh4GuLkR4CED4c",
+            authDomain: "escuela-la-carpio.firebaseapp.com",
+            databaseURL: "https://escuela-la-carpio-default-rtdb.firebaseio.com",
+            projectId: "escuela-la-carpio",
+            storageBucket: "escuela-la-carpio.firebasestorage.app",
+            messagingSenderId: "163331007154",
+            appId: "1:163331007154:web:2465b1068d6b356cbadfab",
+            measurementId: "G-8EBFX04XVC"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // UID Obligatorio del SaaS Master
+        const SAAS_ADMIN_UID = "VYwn6Cy7u8XprETeRgI51YmjKQq2";
+
+        let schools = [];
+        let pendingStatusChange = null;
+
+        // ============================================
+        // AUTENTICACIÓN
+        // ============================================
+        auth.onAuthStateChanged((user) => {
+            const overlay = document.getElementById('saasLoginOverlay');
+            if (user) {
+                if (user.uid === SAAS_ADMIN_UID) {
+                    // Es el administrador SaaS correcto
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                    escucharDatosFirebase();
+                } else {
+                    // Logueado, pero no es el admin SaaS (ej. es el director o el scanner)
+                    auth.signOut().then(() => {
+                        const err = document.getElementById('loginError');
+                        err.innerText = "Acceso Denegado. Esta cuenta no tiene privilegios Master SaaS.";
+                        err.classList.remove('hidden');
+                        overlay.classList.remove('hidden');
+                        overlay.style.opacity = '1';
+                    });
+                }
+            } else {
+                // No logueado
+                overlay.classList.remove('hidden');
+                overlay.style.opacity = '1';
+            }
+        });
+
+        function iniciarSesionSaaS(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPass').value;
+            const btn = document.getElementById('loginBtn');
+            const err = document.getElementById('loginError');
+            
+            btn.innerText = "Autenticando...";
+            btn.disabled = true;
+            err.classList.add('hidden');
 
             auth.signInWithEmailAndPassword(email, pass)
                 .then((userCredential) => {
-                    // VERIFICACIÓN EXTREMA: Idealmente aquí validarías si este usuario tiene el Custom Claim de Súper Admin.
-                    // Para simplificar, verificamos que pueda leer la raíz 'tenants'
-                    return database.ref('tenants').once('value').then(() => {
-                        document.getElementById('saasLoginOverlay').style.opacity = '0';
-                        setTimeout(() => {
-                            document.getElementById('saasLoginOverlay').style.display = 'none';
-                            document.getElementById('mainDashboard').classList.remove('hidden');
-                            cargarTenants();
-                        }, 300);
-                    });
+                    // El listener onAuthStateChanged validará el UID
                 })
                 .catch((error) => {
-                    console.error(error);
-                    errEl.innerText = "Acceso denegado o credenciales incorrectas. Verifique permisos Súper Admin.";
-                    errEl.classList.remove('hidden');
+                    err.innerText = "Error: " + error.message;
+                    err.classList.remove('hidden');
+                    btn.innerText = "Ingresar al Panel";
+                    btn.disabled = false;
                 });
         }
 
         function cerrarSesionSaaS() {
-            auth.signOut().then(() => {
-                location.reload();
+            auth.signOut();
+        }
+
+        // ============================================
+        // CONEXIÓN CON FIREBASE DATABASE
+        // ============================================
+        function escucharDatosFirebase() {
+            // Escuchamos la colección "tenants" que controlará las escuelas
+            database.ref('tenants').on('value', (snapshot) => {
+                schools = [];
+                if(snapshot.exists()) {
+                    snapshot.forEach(childSnapshot => {
+                        const data = childSnapshot.val();
+                        schools.push({
+                            id: childSnapshot.key, // El ID de la base de datos (ej. escuela-carpio)
+                            name: data.name || 'Sin nombre',
+                            url: data.url || 'Sin URL',
+                            admin: data.adminName || 'No definido',
+                            email: data.adminEmail || '',
+                            uid: data.adminUid || '',
+                            amount: data.amount || 0,
+                            period: data.period || 'Mensual',
+                            startDate: data.startDate || '',
+                            endDate: data.endDate || '',
+                            status: data.status || 'bloqueado' // Seguro por defecto
+                        });
+                    });
+                }
+                renderSchoolsTable();
             });
         }
 
-        // Detectar sesión activa al cargar
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // Intento silencioso de validación
-                database.ref('tenants').once('value')
-                    .then(() => {
-                        document.getElementById('saasLoginOverlay').style.display = 'none';
-                        document.getElementById('mainDashboard').classList.remove('hidden');
-                        cargarTenants();
-                    })
-                    .catch(() => {
-                        // Si falla, forzar cierre, no es admin
-                        auth.signOut();
-                    });
+        // ============================================
+        // LÓGICA DE INTERFAZ Y RENDERIZADO
+        // ============================================
+        lucide.createIcons();
+
+        const sidebar = document.getElementById('sidebar');
+        document.getElementById('openSidebar').addEventListener('click', () => { sidebar.classList.remove('-translate-x-full'); });
+        document.getElementById('closeSidebar').addEventListener('click', () => { sidebar.classList.add('-translate-x-full'); });
+
+        function switchTab(tabName) {
+            document.getElementById('tab-dashboard').classList.add('hidden');
+            document.getElementById('tab-escuelas').classList.add('hidden');
+            
+            ['dashboard', 'escuelas'].forEach(nav => {
+                const el = document.getElementById('nav-' + nav);
+                if(el) el.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300';
+            });
+
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            const activeNav = document.getElementById('nav-' + tabName);
+            if(activeNav) activeNav.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-indigo-600 text-white';
+
+            if(tabName === 'escuelas') renderSchoolsTable();
+        }
+
+        const statusConfig = {
+            'activo': { label: 'Activo', color: 'bg-green-100 text-green-800 border-green-200', icon: 'check-circle' },
+            'moroso': { label: 'Moroso (Aviso)', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: 'alert-triangle' },
+            'mantenimiento': { label: 'Mantenimiento', color: 'bg-blue-100 text-blue-800 border-blue-200', icon: 'tool' },
+            'bloqueado': { label: 'Bloqueado', color: 'bg-red-100 text-red-800 border-red-200', icon: 'slash' }
+        };
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = schools.length;
+            document.getElementById('stat-active').innerText = schools.filter(s => s.status === 'activo').length;
+            document.getElementById('stat-moroso').innerText = schools.filter(s => s.status === 'moroso').length;
+            document.getElementById('stat-bloqueado').innerText = schools.filter(s => s.status === 'bloqueado').length;
+        }
+
+        function renderSchoolsTable(filterText = '') {
+            const tbody = document.getElementById('schools-table-body');
+            tbody.innerHTML = '';
+
+            const today = new Date();
+            
+            schools.filter(s => 
+                s.name.toLowerCase().includes(filterText.toLowerCase()) || 
+                s.id.toLowerCase().includes(filterText.toLowerCase())
+            ).forEach((school) => {
+                const st = statusConfig[school.status] || statusConfig['bloqueado'];
+                
+                // Lógica visual: Determinar si la suscripción ha expirado
+                const endDate = new Date(school.endDate);
+                const isExpired = endDate < today && school.status !== 'bloqueado' && school.status !== 'moroso';
+                
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors group';
+                tr.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-900">${school.name}</div>
+                        <div class="text-xs text-slate-500 mt-0.5 font-mono">ID: ${school.id}</div>
+                        <div class="text-[10px] text-indigo-600 flex items-center gap-1 font-mono">
+                            <i data-lucide="link" class="w-3 h-3"></i> ${school.url}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-medium text-slate-900">${school.admin}</div>
+                        <div class="text-xs text-slate-500">${school.email}</div>
+                        <div class="text-[10px] text-slate-400 font-mono mt-1" title="Firebase UID">UID: ${school.uid}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-bold text-slate-700">$${parseFloat(school.amount).toFixed(2)} <span class="font-normal text-slate-500 text-xs">/${school.period}</span></div>
+                        <div class="text-xs ${isExpired ? 'text-red-500 font-bold' : 'text-slate-500'} mt-1 flex items-center gap-1">
+                            <i data-lucide="calendar" class="w-3 h-3"></i> ${school.startDate} a ${school.endDate}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${st.color}">
+                            <i data-lucide="${st.icon}" class="w-3.5 h-3.5"></i>
+                            ${st.label}
+                        </span>
+                        ${isExpired ? '<div class="text-[10px] text-red-500 mt-1 font-bold animate-pulse">¡Suscripción Vencida!</div>' : ''}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <select onchange="requestStatusChange('${school.id}', this.value)" class="text-sm border border-slate-300 rounded-md py-1.5 px-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="" disabled selected>Cambiar estado...</option>
+                            <option value="activo" ${school.status === 'activo' ? 'disabled' : ''}>Marcar Activo</option>
+                            <option value="moroso" ${school.status === 'moroso' ? 'disabled' : ''}>Marcar Moroso</option>
+                            <option value="mantenimiento" ${school.status === 'mantenimiento' ? 'disabled' : ''}>Modo Mantenimiento</option>
+                            <option value="bloqueado" ${school.status === 'bloqueado' ? 'disabled' : ''} class="text-red-600 font-medium">Bloquear Acceso</option>
+                        </select>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            lucide.createIcons();
+            updateStats();
+        }
+
+        function filtrarTablaEscuelas() {
+            renderSchoolsTable(document.getElementById('searchInput').value);
+        }
+
+        // ============================================
+        // ESCRITURA EN FIREBASE
+        // ============================================
+        function openAddSchoolModal() {
+            const modal = document.getElementById('addSchoolModal');
+            const content = document.getElementById('addSchoolModalContent');
+            
+            // Sugerir un ID para la escuela actual basado en los datos proporcionados
+            document.getElementById('schoolId').value = "escuela-la-carpio";
+            document.getElementById('schoolName').value = "Escuela La Carpio";
+            document.getElementById('schoolRep').value = "Junta / Director";
+            document.getElementById('schoolEmail').value = "juntacarpio@mep.com";
+            document.getElementById('schoolUid').value = "GhWXyBqMR4cCNhw2vOpnrTRQLbi2";
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeAddSchoolModal() {
+            const modal = document.getElementById('addSchoolModal');
+            const content = document.getElementById('addSchoolModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('addSchoolForm').reset();
+            }, 300);
+        }
+
+        function submitNewSchool(e) {
+            e.preventDefault();
+            
+            const schoolId = document.getElementById('schoolId').value.trim();
+            if(!schoolId) return alert("Debe proporcionar un ID de Tenant");
+
+            const newSchoolData = {
+                name: document.getElementById('schoolName').value,
+                url: document.getElementById('schoolUrl').value,
+                adminName: document.getElementById('schoolRep').value,
+                adminEmail: document.getElementById('schoolEmail').value,
+                adminUid: document.getElementById('schoolUid').value,
+                amount: parseFloat(document.getElementById('schoolAmount').value),
+                period: document.getElementById('schoolPeriod').value,
+                startDate: document.getElementById('schoolStart').value,
+                endDate: document.getElementById('schoolEnd').value,
+                status: 'activo',
+                createdAt: new Date().toISOString()
+            };
+            
+            // Guardar en Firebase Realtime Database
+            database.ref('tenants/' + schoolId).set(newSchoolData)
+                .then(() => {
+                    closeAddSchoolModal();
+                    // No llamamos a renderSchoolsTable manualmente porque el listener 'value' lo hará
+                })
+                .catch((error) => {
+                    alert("Error al guardar en Firebase: " + error.message);
+                });
+        }
+
+        function requestStatusChange(schoolId, newStatus) {
+            const school = schools.find(s => s.id === schoolId);
+            pendingStatusChange = { schoolId, newStatus };
+            
+            const modalText = document.getElementById('modalText');
+            if(newStatus === 'bloqueado') {
+                modalText.innerHTML = `⚠️ Estás a punto de <b>bloquear totalmente</b> el acceso a la base de datos de <span class="text-red-600 font-bold">${school.name}</span>.`;
+            } else if (newStatus === 'mantenimiento') {
+                modalText.innerHTML = `El sitio de <b>${school.name}</b> mostrará una pantalla de "En Mantenimiento".`;
+            } else if (newStatus === 'moroso') {
+                modalText.innerHTML = `El sitio de <b>${school.name}</b> mostrará una alerta de pago pendiente en la interfaz principal.`;
+            } else {
+                modalText.innerHTML = `El sitio de <b>${school.name}</b> volverá a operar con normalidad.`;
+            }
+
+            const modal = document.getElementById('statusModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('statusModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                pendingStatusChange = null;
+                renderSchoolsTable(document.getElementById('searchInput').value); // Reset select UI
+            }, 300);
+        }
+
+        document.getElementById('confirmStatusBtn').addEventListener('click', () => {
+            if(pendingStatusChange) {
+                const { schoolId, newStatus } = pendingStatusChange;
+                
+                // Actualizar estado en Firebase
+                database.ref('tenants/' + schoolId).update({
+                    status: newStatus,
+                    lastStatusChange: new Date().toISOString()
+                }).then(() => {
+                    closeModal();
+                }).catch((error) => {
+                    alert("Error al actualizar estado en Firebase: " + error.message);
+                    closeModal();
+                });
             }
         });
 
-        // ==========================================
-        // GESTIÓN DE INQUILINOS (TENANTS)
-        // ==========================================
-        function cargarTenants() {
-            const tbody = document.getElementById('tablaTenantsBody');
-            const loader = document.getElementById('tenantsLoading');
-
-            database.ref('tenants').on('value', (snapshot) => {
-                tbody.innerHTML = '';
-                loader.style.display = 'none';
-
-                if (!snapshot.exists()) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-500">No hay inquilinos registrados.</td></tr>';
-                    return;
-                }
-
-                snapshot.forEach((childSnapshot) => {
-                    const tenantId = childSnapshot.key;
-                    const data = childSnapshot.val();
-                    
-                    // Extraer info básica
-                    const nombre = data.metadata?.nombreComercial || tenantId;
-                    const estado = data.status || 'inactivo';
-                    
-                    const isActive = estado === 'activo';
-                    
-                    // Toggle Switch UI
-                    const toggleHtml = `
-                        <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                            <input type="checkbox" id="toggle-${tenantId}" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer transition-all duration-300 ease-in-out ${isActive ? 'checked right-0 border-indigo-600' : 'left-0'}" onchange="cambiarEstadoTenant('${tenantId}', this.checked)" ${isActive ? 'checked' : ''}/>
-                            <label for="toggle-${tenantId}" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300 ${isActive ? 'bg-indigo-600' : ''}"></label>
-                        </div>
-                        <span class="text-xs font-semibold ${isActive ? 'text-emerald-600' : 'text-red-500'} uppercase ml-2 align-middle">${isActive ? 'Activo' : 'Suspendido'}</span>
-                    `;
-
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100 group";
-                    tr.innerHTML = `
-                        <td class="px-6 py-4 font-mono text-sm font-semibold text-slate-700">${tenantId}</td>
-                        <td class="px-6 py-4">
-                            <div class="font-medium text-slate-900">${nombre}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                SaaS Básico
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            ${toggleHtml}
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <button onclick="alert('Estadísticas detalladas de ${tenantId} (En desarrollo)')" class="text-slate-400 hover:text-indigo-600 p-2 transition-colors" title="Ver Detalles">
-                                <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-                
-                // Re-inicializar iconos para los nuevos elementos creados dinámicamente
-                lucide.createIcons();
-            }, (error) => {
-                console.error("Error cargando tenants:", error);
-                alert("Error de permisos: No puede leer la rama de tenants. ¿Es usted un Super Admin?");
-            });
-        }
-
-        // ==========================================
-        // ACCIONES DE MASTER CONTROL
-        // ==========================================
-        
-        function cambiarEstadoTenant(tenantId, isChecked) {
-            const nuevoEstado = isChecked ? 'activo' : 'inactivo';
-            
-            // Confirmación de seguridad si se va a suspender
-            if (!isChecked) {
-                if(!confirm(`⚠️ ADVERTENCIA CRÍTICA\n\n¿Está seguro de suspender a "${tenantId}"?\nSu sistema será bloqueado inmediatamente y perderán acceso total.`)) {
-                    // Revertir el toggle visualmente si cancela
-                    document.getElementById(`toggle-${tenantId}`).checked = true;
-                    return;
-                }
-            }
-
-            database.ref(`tenants/${tenantId}/status`).set(nuevoEstado)
-                .then(() => {
-                    // La UI se actualiza sola gracias al listener 'on value'
-                    console.log(`Estado de ${tenantId} cambiado a ${nuevoEstado}`);
-                })
-                .catch(err => {
-                    alert("Error al cambiar estado: " + err.message);
-                    cargarTenants(); // Recargar para corregir UI
-                });
-        }
-
-        function abrirModalNuevoTenant() {
-            document.getElementById('modalNuevoTenant').style.display = 'flex';
-        }
-        
-        function cerrarModalNuevoTenant() {
-            document.getElementById('modalNuevoTenant').style.display = 'none';
-            document.getElementById('newTenantId').value = '';
-            document.getElementById('newTenantName').value = '';
-            document.getElementById('newTenantLat').value = '';
-            document.getElementById('newTenantLng').value = '';
-        }
-
-        function crearNuevoTenant() {
-            const id = document.getElementById('newTenantId').value.trim().toLowerCase();
-            const nombre = document.getElementById('newTenantName').value.trim();
-            const lat = document.getElementById('newTenantLat').value;
-            const lng = document.getElementById('newTenantLng').value;
-
-            if(!id || !nombre) return alert("ID y Nombre son obligatorios.");
-
-            // Validar que no exista
-            database.ref(`tenants/${id}`).once('value').then(snap => {
-                if(snap.exists()) {
-                    return alert("Error: Ese ID de inquilino ya existe. Elija otro.");
-                }
-
-                // Estructura base del nuevo tenant
-                const newData = {
-                    status: 'activo',
-                    metadata: {
-                        nombreComercial: nombre,
-                        fechaCreacion: new Date().toISOString()
-                    },
-                    config: {
-                        numeroOficial: "00000000",
-                        // Configuramos geocerca si la mandaron, si no, valores nulos
-                        geocerca: (lat && lng) ? { lat: parseFloat(lat), lng: parseFloat(lng), radio: 150 } : null
-                    },
-                    personas: {
-                        "ADMIN_INITIAL": {
-                            nombre: "Administrador Sistema",
-                            tipoUsuario: "Administrativo"
-                        }
-                    },
-                    logs: {},
-                    logs_lejanos: {}
-                };
-
-                database.ref(`tenants/${id}`).set(newData)
-                    .then(() => {
-                        cerrarModalNuevoTenant();
-                        alert(`¡Éxito! Inquilino "${id}" provisionado correctamente.\n\nIMPORTANTE: Ahora debe crear en Firebase Auth un usuario administrador y asignarle el Custom Claim: { "tenant": "${id}" } para que pueda acceder a su instancia.`);
-                    })
-                    .catch(err => alert("Error creando tenant: " + err.message));
-            });
-        }
-
-        // ==========================================
-        // NAVEGACIÓN UI
-        // ==========================================
-        function mostrarSeccion(sec) {
-            document.getElementById('sec-tenants').classList.add('hidden');
-            document.getElementById('sec-global').classList.add('hidden');
-            
-            document.getElementById('nav-tenants').classList.remove('bg-indigo-600', 'text-white');
-            document.getElementById('nav-tenants').classList.add('text-slate-300');
-            document.getElementById('nav-global').classList.remove('bg-indigo-600', 'text-white');
-            document.getElementById('nav-global').classList.add('text-slate-300');
-
-            if(sec === 'tenants') {
-                document.getElementById('sec-tenants').classList.remove('hidden');
-                document.getElementById('pageTitle').innerText = "Gestión de Inquilinos";
-                document.getElementById('nav-tenants').classList.add('bg-indigo-600', 'text-white');
-                document.getElementById('nav-tenants').classList.remove('text-slate-300');
-            } else if (sec === 'global') {
-                document.getElementById('sec-global').classList.remove('hidden');
-                document.getElementById('pageTitle').innerText = "Configuración Global SaaS";
-                document.getElementById('nav-global').classList.add('bg-indigo-600', 'text-white');
-                document.getElementById('nav-global').classList.remove('text-slate-300');
-            }
-        }
     </script>
 </body>
 </html>
