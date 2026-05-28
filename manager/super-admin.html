@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0e27">
+    <title>SaaS Master Control - Prodigital</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0a0e27; --bg-card: #1a1f3a; --bg-hover: #242d4a;
+            --text-primary: #e8eef5; --border-subtle: #2a3250;
+            --accent-primary: #00d9ff; --accent-success: #00ff88; --accent-danger: #ff4444;
+            --radius-md: 10px;
+        }
+        body { font-family: sans-serif; background: var(--bg-dark); color: var(--text-primary); margin: 0; padding: 20px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border-subtle); padding: 30px; border-radius: var(--radius-md); max-width: 400px; margin: 80px auto; text-align: center;}
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 5px; border: 1px solid var(--border-subtle); background: var(--bg-hover); color: white; outline: none;}
+        .btn { padding: 10px 15px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; color: #000; }
+        .btn-m { background: var(--accent-primary); width: 100%; }
+        .btn-s { background: var(--accent-success); }
+        .btn-d { background: var(--accent-danger); color: white; }
+        
+        #dashboard { display: none; max-width: 1200px; margin: 0 auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: var(--bg-card); border-radius: var(--radius-md); overflow: hidden;}
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-subtle); }
+        th { background: var(--bg-hover); color: var(--accent-primary); }
+    </style>
+</head>
+<body>
+
+    <!-- PRUEBA DE AISLAMIENTO VISUAL: Bloqueo inicial -->
+    <div id="loginCard" class="card">
+        <h2 style="color:var(--accent-primary); margin-bottom:20px;">👑 Control Maestro SaaS</h2>
+        <input type="email" id="adminEmail" placeholder="Correo Maestro Autorizado">
+        <input type="password" id="adminPass" placeholder="Contraseña">
+        <button class="btn btn-m" onclick="loginMaestro()">Desbloquear Panel</button>
+    </div>
+
+    <div id="dashboard">
+        <h1 style="color: var(--accent-primary); border-bottom: 1px solid var(--border-subtle); padding-bottom: 15px;">Aprovisionamiento de Socios (Tenants)</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha Solicitud</th>
+                    <th>Institución</th>
+                    <th>Tenant ID</th>
+                    <th>Contacto</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaRequests"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpGu9Bnr5pQhNBK4kYpoh4GuLkR4CED4c",
+            authDomain: "escuela-la-carpio.firebaseapp.com",
+            databaseURL: "https://escuela-la-carpio-default-rtdb.firebaseio.com",
+            projectId: "escuela-la-carpio",
+            storageBucket: "escuela-la-carpio.firebasestorage.app",
+            messagingSenderId: "163331007154",
+            appId: "1:163331007154:web:2465b1068d6b356cbadfab"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        function loginMaestro() {
+            const email = document.getElementById('adminEmail').value.trim();
+            const pass = document.getElementById('adminPass').value;
+            
+            // Restricción en duro (Fase 5 - Validación Visual)
+            if (email !== "norercarlop04@gmail.com") {
+                alert("Acceso denegado. Entorno exclusivo para la cuenta maestra administrativa.");
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, pass).then(() => {
+                document.getElementById('loginCard').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                escucharSolicitudes();
+            }).catch(e => alert("Error de credenciales: " + e.message));
+        }
+
+        function escucharSolicitudes() {
+            database.ref('solicitudes_pendientes').on('value', snapshot => {
+                const tbody = document.getElementById('tablaRequests');
+                tbody.innerHTML = '';
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        const uid = child.key;
+                        const data = child.val();
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${new Date(data.fecha_solicitud).toLocaleString()}</td>
+                            <td><b>${data.nombre_institucion}</b></td>
+                            <td style="color:var(--accent-primary);">${data.tenant_id_sugerido}</td>
+                            <td>${data.email}<br><small>${data.telefono}</small></td>
+                            <td>
+                                <button class="btn btn-s" onclick='aprobarSocio("${uid}", "${data.tenant_id_sugerido}", ${JSON.stringify(data)})'>✅ Aprobar</button>
+                                <button class="btn btn-d" onclick='rechazarSocio("${uid}")'>❌ Borrar</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">No hay solicitudes pendientes</td></tr>';
+                }
+            });
+        }
+
+        // CONTRATO LÓGICO: aprobarSocio (Atomicidad Fan-out garantizada)
+        function aprobarSocio(uid, tenant_id, dataSolicitud) {
+            if(!confirm(`¿Desea aprobar y aprovisionar el entorno para: ${dataSolicitud.nombre_institucion}?`)) return;
+
+            const updates = {};
+            updates[`sys_admin/socios/${tenant_id}/estado`] = "activo";
+            updates[`sys_admin/socios/${tenant_id}/nombre`] = dataSolicitud.nombre_institucion;
+            updates[`tenants/${tenant_id}/admins/${uid}`] = true;
+            updates[`tenants/${tenant_id}/config/numeroOficial`] = dataSolicitud.telefono;
+            updates[`solicitudes_pendientes/${uid}`] = null; // Borrar la solicitud
+
+            database.ref().update(updates)
+                .then(() => alert(`✅ ¡Aprovisionamiento exitoso!\nEl entorno ${tenant_id} está listo para ser usado.`))
+                .catch(err => alert("Error crítico en la transacción: " + err.message));
+        }
+
+        function rechazarSocio(uid) {
+            if(confirm("¿Eliminar definitivamente esta solicitud?")) {
+                database.ref(`solicitudes_pendientes/${uid}`).remove();
+            }
+        }
+    </script>
+</body>
+</html>
