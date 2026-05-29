@@ -680,25 +680,38 @@
         });
 
         // -----------------------------------------------------------
-        // 3️⃣  BLOQUEO AUTOMÁTICO – ESCUCHA DE /tenantDB/<id>/blocked
+        // 3️⃣  BLOQUEO AUTOMÁTICO (ACTUALIZADO SEGÚN SPECS DEL ARCHITECT)
         // -----------------------------------------------------------
         function monitorBlockFlag() {
-            const overlay = document.getElementById('blockedOverlay');
-            database.ref('tenantDB/' + TENANT_ID + '/blocked')
-                .on('value', snap => {
-                    const isBlocked = snap.val() === true;
-                    if (isBlocked) {
-                        // Mostrar overlay de bloqueo
-                        overlay.classList.remove('hidden');
-                        // Detener cualquier cámara activa
-                        if (scannerActivo) toggleScanner();
-                        if (queryScannerActivo) toggleQueryScanner();
-                    } else {
-                        overlay.classList.add('hidden');
-                    }
-                });
+            // Escuchamos directamente el Tenant general tal como se solicitó
+            database.ref('tenants/' + TENANT_ID).on('value', (snapshot) => {
+                const data = snapshot.val();
+                const overlay = document.getElementById('blockedOverlay');
+
+                if (data && data.blocked === true) {
+                    // 1. Mostrar overlay visualmente
+                    if (overlay) overlay.classList.remove('hidden');
+
+                    // 2. Detener cualquier cámara activa por seguridad y evitar memory leaks
+                    if (typeof scannerActivo !== 'undefined' && scannerActivo) toggleScanner();
+                    if (typeof queryScannerActivo !== 'undefined' && queryScannerActivo) toggleQueryScanner();
+
+                    // 3. ACCIÓN DE BLOQUEO INMEDIATO
+                    alert("Su cuenta ha sido suspendida. Contacte al administrador.");
+
+                    // 4. Cierre de sesión y recarga limpia de la SPA
+                    firebase.auth().signOut().then(() => {
+                        window.location.reload(); // Recarga y mantiene la UI bloqueada (sustituye /login.html)
+                    }).catch((error) => {
+                        console.error("Error al cerrar sesión", error);
+                        window.location.reload();
+                    });
+                } else {
+                    if (overlay) overlay.classList.add('hidden');
+                }
+            });
         }
-        monitorBlockFlag();   // <‑‑ Se ejecuta al cargar la página
+        monitorBlockFlag();   // <-- Se ejecuta al cargar la página
 
         // -----------------------------------------------------------
         // 4️⃣  Resto de la lógica del cliente (invariante)
