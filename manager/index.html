@@ -189,7 +189,7 @@
             <form id="addSchoolForm" onsubmit="submitNewSchool(event)" class="space-y-4">
                 <div class="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-3 text-sm mb-4 flex gap-3">
                     <i data-lucide="info" class="w-5 h-5 shrink-0 mt-0.5"></i>
-                    <p>Al guardar, se creará un espacio en blanco aislado en <code>/tenant_data/{ID}</code> listo para que el director suba su CSV la primera vez que inicie sesión.</p>
+                    <p>Al guardar, se creará un espacio en blanco aislado en <code>/tenantDB/{ID}</code> listo para que el director suba su CSV la primera vez que inicie sesión.</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -503,10 +503,10 @@
                 createdAt: new Date().toISOString()
             };
             
-            // OPERACIÓN ATÓMICA: Crea el perfil en SaaS y un nodo vacío preparado para el CSV del cliente
+            // OPERACIÓN ATÓMICA: Crea el perfil en SaaS y la bandera pública según tus reglas
             const updates = {};
             updates[`tenants/${schoolId}`] = newSchoolData;
-            updates[`tenant_data/${schoolId}/_metadata/initialized`] = false; // Bandera para que el cliente pida el CSV al iniciar
+            updates[`tenantDB/${schoolId}/blocked`] = false; 
             
             database.ref().update(updates)
                 .then(() => closeAddSchoolModal())
@@ -514,7 +514,7 @@
         }
 
         // ============================================
-        // LÓGICA DE BLOQUEO ATÓMICO (URL + UID)
+        // LÓGICA DE BLOQUEO ATÓMICO 
         // ============================================
         function requestStatusChange(schoolId, newStatus) {
             const school = schools.find(s => s.id === schoolId);
@@ -527,15 +527,14 @@
                 modalText.innerHTML = `Bloquearás a <span class="text-red-600 font-bold">${school.name}</span>. Esto cortará todo el acceso.`;
                 techActions.innerHTML = `
                     &gt; UPDATE tenants/${schoolId}/status = 'bloqueado'<br>
-                    &gt; SET banned_uids/${school.uid} = true<br>
-                    &gt; SET blocked_urls/${btoa(school.url)} = true
+                    &gt; SET tenantDB/${schoolId}/blocked = true<br>
+                    &gt; SET tenantDB/${schoolId}/blockedAt = timestamp
                 `;
             } else {
                 modalText.innerHTML = `Restaurarás el acceso de <b>${school.name}</b>.`;
                 techActions.innerHTML = `
                     &gt; UPDATE tenants/${schoolId}/status = '${newStatus}'<br>
-                    &gt; DELETE banned_uids/${school.uid}<br>
-                    &gt; DELETE blocked_urls/${btoa(school.url)}
+                    &gt; SET tenantDB/${schoolId}/blocked = false
                 `;
             }
 
@@ -560,7 +559,6 @@
         document.getElementById('confirmStatusBtn').addEventListener('click', () => {
             if(pendingStatusChange) {
                 const { school, newStatus } = pendingStatusChange;
-                const safeUrl = btoa(school.url); // Base64 para usar URLs como llaves de Firebase
 
                 // OPERACIÓN MULTI-PATH ATÓMICA
                 const updates = {};
@@ -568,13 +566,13 @@
                 updates[`tenants/${school.id}/lastStatusChange`] = new Date().toISOString();
 
                 if (newStatus === 'bloqueado') {
-                    // BLOQUEO EFECTIVO: El UID pasa a lista negra y la URL se marca como inhabilitada
-                    updates[`banned_uids/${school.uid}`] = true;
-                    updates[`blocked_urls/${safeUrl}`] = true;
+                    // BLOQUEO EFECTIVO SEGÚN TUS NUEVAS REGLAS
+                    updates[`tenantDB/${school.id}/blocked`] = true;
+                    updates[`tenantDB/${school.id}/blockedAt`] = new Date().toISOString();
                 } else {
                     // RESTAURACIÓN
-                    updates[`banned_uids/${school.uid}`] = null;
-                    updates[`blocked_urls/${safeUrl}`] = null;
+                    updates[`tenantDB/${school.id}/blocked`] = false;
+                    updates[`tenantDB/${school.id}/blockedAt`] = null;
                 }
                 
                 database.ref().update(updates).then(() => closeModal()).catch((err) => {
