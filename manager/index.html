@@ -22,7 +22,7 @@
 </head>
 <body class="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
 
-    <!-- OVERLAY DE LOGIN SAAS -->
+    <!-- OVERLAY DE LOGIN SAAS (Bloquea la vista hasta autenticar) -->
     <div id="saasLoginOverlay" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center transition-opacity duration-300">
         <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4">
             <div class="flex justify-center mb-6">
@@ -111,6 +111,7 @@
                     <p class="text-slate-500 text-sm mt-1">Métricas en tiempo real de todas tus instancias alquiladas.</p>
                 </div>
 
+                <!-- Stats Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
                         <div class="p-3 rounded-lg bg-indigo-100"><i data-lucide="building" class="w-6 h-6 text-indigo-600"></i></div>
@@ -148,7 +149,7 @@
                 <div class="flex justify-between items-end">
                     <div>
                         <h1 class="text-2xl font-bold text-slate-900">Gestión de Escuelas (Inquilinos)</h1>
-                        <p class="text-slate-500 text-sm mt-1">Controla el acceso y partición de datos por inquilino.</p>
+                        <p class="text-slate-500 text-sm mt-1">Controla el acceso y estado de las plataformas conectadas a tu Firebase.</p>
                     </div>
                     <button onclick="openAddSchoolModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 shadow-sm">
                         <i data-lucide="plus" class="w-4 h-4"></i> Nueva Escuela
@@ -160,15 +161,15 @@
                         <table class="w-full text-sm text-left">
                             <thead class="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
                                 <tr>
-                                    <th class="px-6 py-4">Institución / Dominio</th>
-                                    <th class="px-6 py-4">Director / Acceso UID</th>
-                                    <th class="px-6 py-4">Suscripción</th>
+                                    <th class="px-6 py-4">Institución / URL</th>
+                                    <th class="px-6 py-4">Representante / Acceso</th>
+                                    <th class="px-6 py-4">Suscripción (Inicio - Fin)</th>
                                     <th class="px-6 py-4">Estado del Sitio</th>
-                                    <th class="px-6 py-4 text-right">Acciones de Control</th>
+                                    <th class="px-6 py-4 text-right">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="schools-table-body" class="divide-y divide-slate-100">
-                                <!-- Las filas se generan con JavaScript -->
+                                <!-- Las filas se generan con JavaScript desde Firebase -->
                             </tbody>
                         </table>
                     </div>
@@ -182,33 +183,31 @@
     <div id="addSchoolModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 flex items-center justify-center overflow-y-auto">
         <div class="bg-white rounded-xl shadow-xl p-6 max-w-2xl w-full mx-4 my-8 transform scale-95 opacity-0 transition-all" id="addSchoolModalContent">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-slate-900">Crear Inquilino (Base de datos limpia)</h3>
+                <h3 class="text-xl font-bold text-slate-900">Registrar Nueva Institución</h3>
                 <button type="button" onclick="closeAddSchoolModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
             
             <form id="addSchoolForm" onsubmit="submitNewSchool(event)" class="space-y-4">
-                <div class="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-3 text-sm mb-4 flex gap-3">
-                    <i data-lucide="info" class="w-5 h-5 shrink-0 mt-0.5"></i>
-                    <p>Al guardar, se creará un espacio en blanco aislado en <code>/tenantDB/{ID}</code> listo para que el director suba su CSV la primera vez que inicie sesión.</p>
-                </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Identificador Técnico -->
                     <div class="space-y-1 md:col-span-2">
-                        <label class="text-sm font-medium text-slate-700">ID del Tenant (Único, sin espacios)</label>
+                        <label class="text-sm font-medium text-slate-700">ID del Tenant (Único, ej: escuela-carpio)</label>
                         <input type="text" id="schoolId" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-slate-50">
                     </div>
 
+                    <!-- Institución -->
                     <div class="space-y-1">
                         <label class="text-sm font-medium text-slate-700">Nombre de la Institución</label>
                         <input type="text" id="schoolName" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                     <div class="space-y-1">
-                        <label class="text-sm font-medium text-slate-700">URL del Sitio Cliente</label>
-                        <input type="url" id="schoolUrl" required placeholder="https://mi-escuela.com" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <label class="text-sm font-medium text-slate-700">URL del Sitio Principal</label>
+                        <input type="text" id="schoolUrl" required placeholder="ej. mipagina.com o 127.0.0.1" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                     
+                    <!-- Representante y Acceso -->
                     <div class="space-y-1">
-                        <label class="text-sm font-medium text-slate-700">Nombre del Director</label>
+                        <label class="text-sm font-medium text-slate-700">Nombre del Representante (Director)</label>
                         <input type="text" id="schoolRep" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                     <div class="space-y-1">
@@ -216,12 +215,13 @@
                         <input type="email" id="schoolEmail" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                     <div class="space-y-1 md:col-span-2">
-                        <label class="text-sm font-medium text-slate-700">Firebase UID del Director</label>
-                        <input type="text" id="schoolUid" required placeholder="Ej: GhWXyBqMR4cCNhw..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <label class="text-sm font-medium text-slate-700">Firebase UID del Director (Vinculación)</label>
+                        <input type="text" id="schoolUid" required placeholder="Ej: GhWXyBqMR4cCNhw2vOpnrTRQLbi2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
 
+                    <!-- Suscripción -->
                     <div class="space-y-1">
-                        <label class="text-sm font-medium text-slate-700">Monto ($)</label>
+                        <label class="text-sm font-medium text-slate-700">Monto de Suscripción ($)</label>
                         <input type="number" id="schoolAmount" required min="0" step="0.01" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                     <div class="space-y-1">
@@ -232,41 +232,37 @@
                         </select>
                     </div>
                     <div class="space-y-1">
-                        <label class="text-sm font-medium text-slate-700">Inicio</label>
+                        <label class="text-sm font-medium text-slate-700">Fecha de Inicio</label>
                         <input type="date" id="schoolStart" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                     <div class="space-y-1">
-                        <label class="text-sm font-medium text-slate-700">Vencimiento</label>
+                        <label class="text-sm font-medium text-slate-700">Fecha de Vencimiento</label>
                         <input type="date" id="schoolEnd" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                 </div>
                 
                 <div class="flex gap-3 justify-end mt-6 pt-4 border-t border-slate-200">
                     <button type="button" onclick="closeAddSchoolModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Crear Instancia Multi-Tenant</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Guardar en Firebase</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal de confirmación de Bloqueo/Estado -->
+    <!-- Modal de confirmación -->
     <div id="statusModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 flex items-center justify-center">
         <div class="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4 transform scale-95 opacity-0 transition-all" id="modalContent">
             <div class="flex items-center gap-4 mb-4">
                 <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
                     <i data-lucide="alert-circle" class="w-6 h-6 text-yellow-600"></i>
                 </div>
-                <h3 class="text-lg font-bold text-slate-900">Aplicar Reglas de Bloqueo</h3>
+                <h3 class="text-lg font-bold text-slate-900">Cambiar estado del sitio</h3>
             </div>
-            <p class="text-slate-600 text-sm mb-6" id="modalText"></p>
-            <div class="bg-slate-50 border border-slate-200 rounded p-3 text-xs text-slate-500 mb-6 font-mono" id="technicalActions">
-                <!-- Se llena dinámicamente -->
-            </div>
-
+            <p class="text-slate-600 text-sm mb-6" id="modalText">¿Estás seguro de que deseas cambiar el estado de esta escuela en la base de datos?</p>
             <div class="flex gap-3 justify-end">
                 <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
                 <button id="confirmStatusBtn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center gap-2">
-                    <i data-lucide="shield-alert" class="w-4 h-4"></i> Aplicar Cambios
+                    <i data-lucide="database" class="w-4 h-4"></i> Confirmar Cambio
                 </button>
             </div>
         </div>
@@ -274,7 +270,7 @@
 
     <script>
         // ============================================
-        // CONFIGURACIÓN FIREBASE 
+        // CONFIGURACIÓN FIREBASE (Conectado a la BD de La Carpio)
         // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBpGu9Bnr5pQhNBK4kYpoh4GuLkR4CED4c",
@@ -298,25 +294,28 @@
         let pendingStatusChange = null;
 
         // ============================================
-        // AUTENTICACIÓN SAAS
+        // AUTENTICACIÓN
         // ============================================
         auth.onAuthStateChanged((user) => {
             const overlay = document.getElementById('saasLoginOverlay');
             if (user) {
                 if (user.uid === SAAS_ADMIN_UID) {
+                    // Es el administrador SaaS correcto
                     overlay.style.opacity = '0';
                     setTimeout(() => overlay.classList.add('hidden'), 300);
                     escucharDatosFirebase();
                 } else {
+                    // Logueado, pero no es el admin SaaS (ej. es el director o el scanner)
                     auth.signOut().then(() => {
                         const err = document.getElementById('loginError');
-                        err.innerText = "Acceso Denegado. Se requiere cuenta Master.";
+                        err.innerText = "Acceso Denegado. Esta cuenta no tiene privilegios Master SaaS.";
                         err.classList.remove('hidden');
                         overlay.classList.remove('hidden');
                         overlay.style.opacity = '1';
                     });
                 }
             } else {
+                // No logueado
                 overlay.classList.remove('hidden');
                 overlay.style.opacity = '1';
             }
@@ -333,12 +332,16 @@
             btn.disabled = true;
             err.classList.add('hidden');
 
-            auth.signInWithEmailAndPassword(email, pass).catch((error) => {
-                err.innerText = "Error: " + error.message;
-                err.classList.remove('hidden');
-                btn.innerText = "Ingresar al Panel";
-                btn.disabled = false;
-            });
+            auth.signInWithEmailAndPassword(email, pass)
+                .then((userCredential) => {
+                    // El listener onAuthStateChanged validará el UID
+                })
+                .catch((error) => {
+                    err.innerText = "Error: " + error.message;
+                    err.classList.remove('hidden');
+                    btn.innerText = "Ingresar al Panel";
+                    btn.disabled = false;
+                });
         }
 
         function cerrarSesionSaaS() {
@@ -346,18 +349,19 @@
         }
 
         // ============================================
-        // LECTURA DE DATOS MULTI-TENANT
+        // CONEXIÓN CON FIREBASE DATABASE
         // ============================================
         function escucharDatosFirebase() {
+            // Escuchamos la colección "tenants" que controlará las escuelas
             database.ref('tenants').on('value', (snapshot) => {
                 schools = [];
                 if(snapshot.exists()) {
                     snapshot.forEach(childSnapshot => {
                         const data = childSnapshot.val();
                         schools.push({
-                            id: childSnapshot.key,
+                            id: childSnapshot.key, // El ID de la base de datos (ej. escuela-carpio)
                             name: data.name || 'Sin nombre',
-                            url: data.url || '#',
+                            url: data.url || 'Sin URL',
                             admin: data.adminName || 'No definido',
                             email: data.adminEmail || '',
                             uid: data.adminUid || '',
@@ -365,7 +369,7 @@
                             period: data.period || 'Mensual',
                             startDate: data.startDate || '',
                             endDate: data.endDate || '',
-                            status: data.status || 'bloqueado'
+                            status: data.status || 'bloqueado' // Seguro por defecto
                         });
                     });
                 }
@@ -374,7 +378,7 @@
         }
 
         // ============================================
-        // INTERFAZ DE USUARIO
+        // LÓGICA DE INTERFAZ Y RENDERIZADO
         // ============================================
         lucide.createIcons();
 
@@ -400,9 +404,9 @@
 
         const statusConfig = {
             'activo': { label: 'Activo', color: 'bg-green-100 text-green-800 border-green-200', icon: 'check-circle' },
-            'moroso': { label: 'Moroso', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: 'alert-triangle' },
+            'moroso': { label: 'Moroso (Aviso)', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: 'alert-triangle' },
             'mantenimiento': { label: 'Mantenimiento', color: 'bg-blue-100 text-blue-800 border-blue-200', icon: 'tool' },
-            'bloqueado': { label: 'Bloqueado (URL/UID Inhabilitados)', color: 'bg-red-100 text-red-800 border-red-200', icon: 'slash' }
+            'bloqueado': { label: 'Bloqueado', color: 'bg-red-100 text-red-800 border-red-200', icon: 'slash' }
         };
 
         function updateStats() {
@@ -415,12 +419,18 @@
         function renderSchoolsTable(filterText = '') {
             const tbody = document.getElementById('schools-table-body');
             tbody.innerHTML = '';
+
             const today = new Date();
             
-            schools.filter(s => s.name.toLowerCase().includes(filterText.toLowerCase()) || s.id.toLowerCase().includes(filterText.toLowerCase()))
-            .forEach((school) => {
+            schools.filter(s => 
+                s.name.toLowerCase().includes(filterText.toLowerCase()) || 
+                s.id.toLowerCase().includes(filterText.toLowerCase())
+            ).forEach((school) => {
                 const st = statusConfig[school.status] || statusConfig['bloqueado'];
-                const isExpired = new Date(school.endDate) < today && school.status !== 'bloqueado';
+                
+                // Lógica visual: Determinar si la suscripción ha expirado
+                const endDate = new Date(school.endDate);
+                const isExpired = endDate < today && school.status !== 'bloqueado' && school.status !== 'moroso';
                 
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition-colors group';
@@ -428,52 +438,68 @@
                     <td class="px-6 py-4">
                         <div class="font-bold text-slate-900">${school.name}</div>
                         <div class="text-xs text-slate-500 mt-0.5 font-mono">ID: ${school.id}</div>
-                        <a href="${school.url}" target="_blank" class="inline-flex items-center gap-1 mt-1 text-[11px] font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 transition-colors">
-                            <i data-lucide="external-link" class="w-3 h-3"></i> Abrir Sitio
-                        </a>
+                        <div class="text-[10px] text-indigo-600 flex items-center gap-1 font-mono">
+                            <i data-lucide="link" class="w-3 h-3"></i> ${school.url}
+                        </div>
                     </td>
                     <td class="px-6 py-4">
                         <div class="text-sm font-medium text-slate-900">${school.admin}</div>
-                        <div class="text-[10px] text-slate-500 mt-1" title="Firebase UID">UID: <code>${school.uid}</code></div>
+                        <div class="text-xs text-slate-500">${school.email}</div>
+                        <div class="text-[10px] text-slate-400 font-mono mt-1" title="Firebase UID">UID: ${school.uid}</div>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="text-sm font-bold text-slate-700">$${parseFloat(school.amount).toFixed(2)}</div>
-                        <div class="text-xs ${isExpired ? 'text-red-500 font-bold' : 'text-slate-500'} mt-1">
-                            ${school.startDate} a ${school.endDate}
+                        <div class="text-sm font-bold text-slate-700">$${parseFloat(school.amount).toFixed(2)} <span class="font-normal text-slate-500 text-xs">/${school.period}</span></div>
+                        <div class="text-xs ${isExpired ? 'text-red-500 font-bold' : 'text-slate-500'} mt-1 flex items-center gap-1">
+                            <i data-lucide="calendar" class="w-3 h-3"></i> ${school.startDate} a ${school.endDate}
                         </div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${st.color}">
-                            <i data-lucide="${st.icon}" class="w-3.5 h-3.5"></i> ${st.label}
+                            <i data-lucide="${st.icon}" class="w-3.5 h-3.5"></i>
+                            ${st.label}
                         </span>
+                        ${isExpired ? '<div class="text-[10px] text-red-500 mt-1 font-bold animate-pulse">¡Suscripción Vencida!</div>' : ''}
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <div class="flex items-center justify-end gap-2">
-                            <select onchange="requestStatusChange('${school.id}', this.value)" class="text-sm border border-slate-300 rounded-md py-1.5 px-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <option value="" disabled selected>Acción...</option>
-                                <option value="activo" ${school.status === 'activo' ? 'disabled' : ''}>Habilitar</option>
-                                <option value="moroso" ${school.status === 'moroso' ? 'disabled' : ''}>Alerta Moroso</option>
-                                <option value="bloqueado" ${school.status === 'bloqueado' ? 'disabled' : ''} class="text-red-600 font-bold">Bloquear (UID y URL)</option>
-                            </select>
-                        </div>
+                        <select onchange="requestStatusChange('${school.id}', this.value)" class="text-sm border border-slate-300 rounded-md py-1.5 px-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="" disabled selected>Cambiar estado...</option>
+                            <option value="activo" ${school.status === 'activo' ? 'disabled' : ''}>Marcar Activo</option>
+                            <option value="moroso" ${school.status === 'moroso' ? 'disabled' : ''}>Marcar Moroso</option>
+                            <option value="mantenimiento" ${school.status === 'mantenimiento' ? 'disabled' : ''}>Modo Mantenimiento</option>
+                            <option value="bloqueado" ${school.status === 'bloqueado' ? 'disabled' : ''} class="text-red-600 font-medium">Bloquear Acceso</option>
+                        </select>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+            
             lucide.createIcons();
             updateStats();
         }
 
-        function filtrarTablaEscuelas() { renderSchoolsTable(document.getElementById('searchInput').value); }
+        function filtrarTablaEscuelas() {
+            renderSchoolsTable(document.getElementById('searchInput').value);
+        }
 
         // ============================================
-        // CREACIÓN ATÓMICA DE TENANT Y ESPACIO VACÍO
+        // ESCRITURA EN FIREBASE (CREACIÓN ATÓMICA)
         // ============================================
         function openAddSchoolModal() {
             const modal = document.getElementById('addSchoolModal');
             const content = document.getElementById('addSchoolModalContent');
+            
+            // Sugerir un ID para la escuela actual basado en los datos proporcionados
+            document.getElementById('schoolId').value = "escuela-la-carpio";
+            document.getElementById('schoolName').value = "Escuela La Carpio";
+            document.getElementById('schoolRep').value = "Junta / Director";
+            document.getElementById('schoolEmail').value = "juntacarpio@mep.com";
+            document.getElementById('schoolUid').value = "GhWXyBqMR4cCNhw2vOpnrTRQLbi2";
+
             modal.classList.remove('hidden');
-            setTimeout(() => { content.classList.remove('scale-95', 'opacity-0'); content.classList.add('scale-100', 'opacity-100'); }, 10);
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
         }
 
         function closeAddSchoolModal() {
@@ -481,13 +507,17 @@
             const content = document.getElementById('addSchoolModalContent');
             content.classList.remove('scale-100', 'opacity-100');
             content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => { modal.classList.add('hidden'); document.getElementById('addSchoolForm').reset(); }, 300);
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('addSchoolForm').reset();
+            }, 300);
         }
 
         function submitNewSchool(e) {
             e.preventDefault();
+            
             const schoolId = document.getElementById('schoolId').value.trim();
-            if(!schoolId || schoolId.includes(' ')) return alert("ID inválido. No debe contener espacios.");
+            if(!schoolId) return alert("Debe proporcionar un ID de Tenant");
 
             const newSchoolData = {
                 name: document.getElementById('schoolName').value,
@@ -503,80 +533,87 @@
                 createdAt: new Date().toISOString()
             };
             
-            // OPERACIÓN ATÓMICA: Crea el perfil en SaaS y la bandera pública según tus reglas
+            // Multi-path Update (Atómico): Crea el perfil y la bandera en tenantDB
             const updates = {};
             updates[`tenants/${schoolId}`] = newSchoolData;
-            updates[`tenantDB/${schoolId}/blocked`] = false; 
-            
+            updates[`tenantDB/${schoolId}/blocked`] = false;
+
             database.ref().update(updates)
-                .then(() => closeAddSchoolModal())
-                .catch(err => alert("Error DB: " + err.message));
+                .then(() => {
+                    closeAddSchoolModal();
+                })
+                .catch((error) => {
+                    alert("Error al guardar en Firebase: " + error.message);
+                });
         }
 
         // ============================================
-        // LÓGICA DE BLOQUEO ATÓMICO 
+        // LÓGICA DE BLOQUEO ATÓMICO (EL "KILL-SWITCH")
         // ============================================
         function requestStatusChange(schoolId, newStatus) {
             const school = schools.find(s => s.id === schoolId);
-            pendingStatusChange = { school, newStatus };
+            pendingStatusChange = { schoolId, newStatus, schoolName: school.name };
             
             const modalText = document.getElementById('modalText');
-            const techActions = document.getElementById('technicalActions');
-            
             if(newStatus === 'bloqueado') {
-                modalText.innerHTML = `Bloquearás a <span class="text-red-600 font-bold">${school.name}</span>. Esto cortará todo el acceso.`;
-                techActions.innerHTML = `
-                    &gt; UPDATE tenants/${schoolId}/status = 'bloqueado'<br>
-                    &gt; SET tenantDB/${schoolId}/blocked = true<br>
-                    &gt; SET tenantDB/${schoolId}/blockedAt = timestamp
-                `;
+                modalText.innerHTML = `⚠️ Estás a punto de <b>bloquear totalmente</b> el acceso. Esto pondrá su base de datos como inaccesible y el URL quedará inactivo para <span class="text-red-600 font-bold">${school.name}</span>.`;
+            } else if (newStatus === 'mantenimiento') {
+                modalText.innerHTML = `⚠️ El sitio de <b>${school.name}</b> mostrará una pantalla de "En Mantenimiento" y <b>su base de datos quedará inaccesible automáticamente</b>.`;
+            } else if (newStatus === 'moroso') {
+                modalText.innerHTML = `⚠️ El sitio de <b>${school.name}</b> se marcará como moroso. <b>El URL quedará inactivo y su base de datos bloqueada</b>.`;
             } else {
-                modalText.innerHTML = `Restaurarás el acceso de <b>${school.name}</b>.`;
-                techActions.innerHTML = `
-                    &gt; UPDATE tenants/${schoolId}/status = '${newStatus}'<br>
-                    &gt; SET tenantDB/${schoolId}/blocked = false
-                `;
+                modalText.innerHTML = `✅ El sitio de <b>${school.name}</b> volverá a operar con normalidad (Desbloqueado).`;
             }
 
             const modal = document.getElementById('statusModal');
             const modalContent = document.getElementById('modalContent');
+            
             modal.classList.remove('hidden');
-            setTimeout(() => { modalContent.classList.remove('scale-95', 'opacity-0'); modalContent.classList.add('scale-100', 'opacity-100'); }, 10);
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
         }
 
         function closeModal() {
             const modal = document.getElementById('statusModal');
             const modalContent = document.getElementById('modalContent');
+            
             modalContent.classList.remove('scale-100', 'opacity-100');
             modalContent.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => { 
-                modal.classList.add('hidden'); 
-                pendingStatusChange = null; 
-                renderSchoolsTable(document.getElementById('searchInput').value); 
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                pendingStatusChange = null;
+                renderSchoolsTable(document.getElementById('searchInput').value); // Reset select UI
             }, 300);
         }
 
         document.getElementById('confirmStatusBtn').addEventListener('click', () => {
             if(pendingStatusChange) {
-                const { school, newStatus } = pendingStatusChange;
-
-                // OPERACIÓN MULTI-PATH ATÓMICA
-                const updates = {};
-                updates[`tenants/${school.id}/status`] = newStatus;
-                updates[`tenants/${school.id}/lastStatusChange`] = new Date().toISOString();
-
-                if (newStatus === 'bloqueado') {
-                    // BLOQUEO EFECTIVO SEGÚN TUS NUEVAS REGLAS
-                    updates[`tenantDB/${school.id}/blocked`] = true;
-                    updates[`tenantDB/${school.id}/blockedAt`] = new Date().toISOString();
-                } else {
-                    // RESTAURACIÓN
-                    updates[`tenantDB/${school.id}/blocked`] = false;
-                    updates[`tenantDB/${school.id}/blockedAt`] = null;
-                }
+                const { schoolId, newStatus } = pendingStatusChange;
                 
-                database.ref().update(updates).then(() => closeModal()).catch((err) => {
-                    alert("Error en transacción atómica: " + err.message);
+                // Si el estado es moroso, mantenimiento o bloqueado, la bandera será TRUE
+                const shouldBlockDatabase = (newStatus === 'bloqueado' || newStatus === 'moroso' || newStatus === 'mantenimiento');
+
+                // Preparamos la transacción atómica (Actualiza ambas rutas al mismo tiempo)
+                const updates = {};
+                updates[`tenants/${schoolId}/status`] = newStatus;
+                updates[`tenants/${schoolId}/lastStatusChange`] = new Date().toISOString();
+                
+                // Aplicamos el bloqueo real en el nodo tenantDB (El que rige el sitio web)
+                updates[`tenantDB/${schoolId}/blocked`] = shouldBlockDatabase;
+                
+                if (shouldBlockDatabase) {
+                    updates[`tenantDB/${schoolId}/blockedAt`] = new Date().toISOString();
+                } else {
+                    updates[`tenantDB/${schoolId}/blockedAt`] = null; // Limpia si se activa
+                }
+
+                database.ref().update(updates).then(() => {
+                    closeModal();
+                }).catch((error) => {
+                    alert("Error al actualizar estado en Firebase: " + error.message);
                     closeModal();
                 });
             }
