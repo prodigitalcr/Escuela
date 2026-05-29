@@ -23,9 +23,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        /* -----------------------------------------------------------
+        /* ============================================
            VARIABLES Y TEMA MINIMALISTA NEGRO / CLARO
-           ----------------------------------------------------------- */
+           ============================================ */
         :root {
             --bg-dark: #0a0e27;
             --bg-darker: #050810;
@@ -71,9 +71,9 @@
             --shadow-glow: 0 0 20px rgba(0, 184, 212, 0.15);
         }
 
-        /* -----------------------------------------------------------
+        /* ============================================
            ANIMACIONES
-           ----------------------------------------------------------- */
+           ============================================ */
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes glow-pulse {
@@ -90,9 +90,9 @@
             100% { transform: translateY(100%); }
         }
 
-        /* -----------------------------------------------------------
+        /* ============================================
            RESET Y BASE
-           ----------------------------------------------------------- */
+           ============================================ */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { height: 100%; width: 100%; }
         body {
@@ -112,9 +112,9 @@
             transition: background var(--transition-normal), color var(--transition-fast);
         }
 
-        /* -----------------------------------------------------------
+        /* ============================================
            NAVBAR MINIMALISTA
-           ----------------------------------------------------------- */
+           ============================================ */
         .navbar {
             background: rgba(10, 14, 39, 0.95);
             border-bottom: 1px solid var(--border-subtle);
@@ -138,9 +138,9 @@
         .navbar-title img { max-height: 45px; border-radius: 8px; object-fit: contain; }
         .navbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
-        /* -----------------------------------------------------------
-           VISTAS PRINCIPALES (SCROLL MOBILE)
-           ----------------------------------------------------------- */
+        /* ============================================
+           VISTAS PRINCIPALES (CORRECCIÓN SCROLL MÓVIL)
+           ============================================ */
         #scan-view, #parent-view, #register-view, #home-view {
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
             padding: 24px; overflow-y: auto; animation: fade-in 0.4s ease-out;
@@ -161,22 +161,22 @@
             backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* -----------------------------------------------------------
-           TARJETAS MINIMALISTAS (SCROLL)
-           ----------------------------------------------------------- */
+        /* ============================================
+           TARJETAS MINIMALISTAS (CORRECCIÓN SCROLL)
+           ============================================ */
         .card {
             background: var(--bg-card); border: 1px solid var(--border-subtle); padding: 32px;
             border-radius: var(--radius-lg); width: 100%; max-width: 480px; box-shadow: var(--shadow-lg);
             animation: slide-up 0.5s ease-out; transition: all var(--transition-normal); position: relative; 
-            overflow: hidden; margin: auto; /* permite scroll natural sin cortar bordes en móvil */
+            overflow: hidden; margin: auto; /* Permite scroll natural sin cortar bordes en móvil */
             margin-bottom: 20px; flex-shrink: 0;
         }
         .card:hover { border-color: var(--border-light); box-shadow: var(--shadow-lg), var(--shadow-glow); transform: translateY(-2px); }
         .card h2 { font-size: 1.3rem; font-weight: 600; margin-bottom: 24px; color: var(--accent-primary); letter-spacing: 0.5px; }
 
-        /* -----------------------------------------------------------
+        /* ============================================
            INPUTS Y BOTONES
-           ----------------------------------------------------------- */
+           ============================================ */
         input[type="text"], input[type="email"], input[type="date"], input[type="password"], input[type="number"], select {
             width: 100%; padding: 12px 16px; font-size: 0.95rem; background: var(--bg-hover);
             border: 1px solid var(--border-subtle); border-radius: var(--radius-md); color: var(--text-primary);
@@ -207,9 +207,9 @@
         .btn-group { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
         .btn-group .btn { flex: 1; min-width: 110px; }
 
-        /* -----------------------------------------------------------
+        /* ============================================
            CÁMARA FACIAL E IA
-           ----------------------------------------------------------- */
+           ============================================ */
         .video-container {
             position: relative; width: 100%; height: 320px; border-radius: var(--radius-lg);
             overflow: hidden; background: #000; border: 2px solid var(--border-subtle);
@@ -231,9 +231,9 @@
             font-size: 0.85rem; color: var(--accent-warning); text-align: center; margin-top: 10px; font-weight: bold;
         }
 
-        /* -----------------------------------------------------------
-           RESULTADOS Y MODALES (SCROLL)
-           ----------------------------------------------------------- */
+        /* ============================================
+           RESULTADOS Y MODALES (CORRECCIÓN SCROLL)
+           ============================================ */
         #resBox {
             margin-top: 15px; display: none; padding: 20px; border-radius: var(--radius-md);
             border: 1px solid var(--border-light); background: var(--bg-hover);
@@ -249,9 +249,9 @@
             backdrop-filter: blur(5px);
         }
 
-        /* -----------------------------------------------------------
+        /* ============================================
            PANEL MAESTRO Y TABLAS
-           ----------------------------------------------------------- */
+           ============================================ */
         #master-panel {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(10, 14, 39, 0.95); z-index: 1000; padding: 24px; box-sizing: border-box;
@@ -298,29 +298,6 @@
         }
 
         @media print { .no-print { display: none !important; } body { background: white; color: black; } }
-
-        /* -----------------------------------------------------------
-           *** BLOQUEO AUTOMÁTICO – OVERLAY DE ACCESO BLOQUEADO ***
-           ----------------------------------------------------------- */
-        #blockedOverlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        #blockedOverlay.hidden { display: none; }
-        #blockedOverlay .card {
-            max-width: 380px;
-            text-align: center;
-            background: #ffffff;
-            color: #111111;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-        }
     </style>
 </head>
 <body>
@@ -452,7 +429,7 @@
             </div>
             <p id="query-ai-status" class="ai-status" style="margin-bottom: 12px;">La cámara de consulta permite reconocerte a ti o a tus padres automáticamente.</p>
             
-            <button id="btnCamaraQuery" class="btn btn-m btn-full" onclick="toggleQueryScanner()">📷 Iniciar Consulta Facial</button>
+            <button id="btnCamaraQuery" class="btn btn-m btn-full" onclick="toggleQueryScanner()">📷 Iniciar Consulta por Rostro</button>
             
             <div style="text-align: center; margin: 15px 0; color: var(--text-muted); font-size: 0.85rem;">
                 - O CONSULTA MANUAL POR CÉDULA -
@@ -544,7 +521,7 @@
                     <button class="btn btn-s" onclick="filtrarVistaReporte('ENTRADA')">✅ Llegaron</button>
                     <button class="btn btn-m" onclick="filtrarVistaReporte('SALIDA')">🚪 Salieron</button>
                     <button class="btn btn-d" onclick="filtrarVistaReporte('AUSENTES')">❌ Ausentes</button>
-                    <button class="btn btn-i" onclick="filtrarVistaReporte('TODOS')">📋 Todos los Movimientos</button>
+                    <button class="btn btn-i" onclick="filtrarVistaReporte('TODOS')">📋 Todos</button>
                 </div>
                 <div style="display:flex; gap:5px; margin-top:10px;">
                     <button class="btn btn-w" onclick="exportarPDFReporte()">📕 PDF REPORTE</button>
@@ -621,24 +598,10 @@
         </div>
     </div>
 
-    <!-- ***********************************************
-         *** BLOQUEO AUTOMÁTICO – OVERLAY DE ACCESO BLOQUEADO ***
-         *********************************************** -->
-    <div id="blockedOverlay" class="hidden">
-        <div class="card">
-            <h2 style="color:#ff4444; font-size:2rem; margin-bottom:1rem;">⚠️ Acceso Bloqueado</h2>
-            <p style="font-size:1rem; color:#333;">
-                La suscripción o el estado de esta escuela está temporalmente inactivo.<br>
-                Por favor, contacte al administrador del SaaS para restablecer el acceso.
-            </p>
-            <button class="btn btn-m" style="margin-top:1rem;" onclick="location.reload()">Reintentar</button>
-        </div>
-    </div>
-
     <script>
-        // ===========================================================
+        // ============================================
         // CONFIGURACIÓN FIREBASE (Con tus credenciales y reglas)
-        // ===========================================================
+        // ============================================
         let NUMERO_OFICIAL_JUNTA = "88888888"; 
         
         const firebaseConfig = {
@@ -655,67 +618,6 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // -----------------------------------------------------------
-        // 1️⃣ IDENTIFICADOR DEL TENANT (puede extraerse del dominio)
-        // -----------------------------------------------------------
-        const TENANT_ID = "escuela-la-carpio";   // <-- Cambia si usas sub‑dominio dinámico
-
-        // -----------------------------------------------------------
-        // 2️⃣  MONITOREO DEL ESTADO GLOBAL (status) – ya existente
-        // -----------------------------------------------------------
-        database.ref('tenants/' + TENANT_ID + '/status').on('value', (snapshot) => {
-            const estadoSaaS = snapshot.val();
-            if (estadoSaaS && estadoSaaS !== 'activo') {
-                // Bloqueo total del sitio (status != activo)
-                document.body.innerHTML = `
-                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0a0e27;font-family:sans-serif;padding:20px;text-align:center;">
-                        <h1 style="color:#ff4444;font-size:2.8rem;margin-bottom:15px;font-weight:bold;">⚠️ Acceso Suspendido</h1>
-                        <p style="color:#a8b2c1;font-size:1.2rem;max-width:600px;line-height:1.6;">
-                            El servicio asociado a este entorno (<strong>${TENANT_ID}</strong>) se encuentra temporalmente inactivo.<br><br>
-                            Por favor, contacte a soporte técnico o a la administración de SaaS para restablecer la conexión.
-                        </p>
-                    </div>
-                `;
-            }
-        });
-
-        // -----------------------------------------------------------
-        // 3️⃣  BLOQUEO AUTOMÁTICO (ACTUALIZADO SEGÚN SPECS DEL ARCHITECT)
-        // -----------------------------------------------------------
-        function monitorBlockFlag() {
-            // Escuchamos directamente el Tenant general tal como se solicitó
-            database.ref('tenants/' + TENANT_ID).on('value', (snapshot) => {
-                const data = snapshot.val();
-                const overlay = document.getElementById('blockedOverlay');
-
-                if (data && data.blocked === true) {
-                    // 1. Mostrar overlay visualmente
-                    if (overlay) overlay.classList.remove('hidden');
-
-                    // 2. Detener cualquier cámara activa por seguridad y evitar memory leaks
-                    if (typeof scannerActivo !== 'undefined' && scannerActivo) toggleScanner();
-                    if (typeof queryScannerActivo !== 'undefined' && queryScannerActivo) toggleQueryScanner();
-
-                    // 3. ACCIÓN DE BLOQUEO INMEDIATO
-                    alert("Su cuenta ha sido suspendida. Contacte al administrador.");
-
-                    // 4. Cierre de sesión y recarga limpia de la SPA
-                    firebase.auth().signOut().then(() => {
-                        window.location.reload(); // Recarga y mantiene la UI bloqueada (sustituye /login.html)
-                    }).catch((error) => {
-                        console.error("Error al cerrar sesión", error);
-                        window.location.reload();
-                    });
-                } else {
-                    if (overlay) overlay.classList.add('hidden');
-                }
-            });
-        }
-        monitorBlockFlag();   // <-- Se ejecuta al cargar la página
-
-        // -----------------------------------------------------------
-        // 4️⃣  Resto de la lógica del cliente (invariante)
-        // -----------------------------------------------------------
         let db = { personas: {} };
         let logsGlobal = [];
         let logsLejanosGlobal = [];
@@ -757,9 +659,9 @@
         }
         cargarLogoPersonalizado();
 
-        // ===========================================================
+        // ============================================
         // SISTEMA DE INICIO DE SESIÓN SEGURO (FIREBASE AUTH)
-        // ===========================================================
+        // ============================================
         let contextoLogin = '';
 
         function abrirLogin(tipo) {
@@ -811,15 +713,15 @@
                 });
         }
 
-        // ===========================================================
+        // ============================================
         // SISTEMA DE INACTIVIDAD (IDLE) - FONDO DE PANTALLA
-        // ===========================================================
+        // ============================================
         let idleTimeout;
         const IDLE_TIME = 45000; // 45 Segundos de inactividad
 
         function resetIdleTimer() {
             clearTimeout(idleTimeout);
-            // No reiniciar si alguna vista con cámara está activa o el panel admin está abierto
+            
             if(!scannerActivo && !queryScannerActivo && 
                document.getElementById('master-panel').style.display !== 'block' && 
                document.getElementById('face-modal').style.display !== 'flex' &&
@@ -847,9 +749,9 @@
         }
         updateIdleClock();
 
-        // ===========================================================
+        // ============================================
         // SISTEMA AVANZADO DE SONIDOS MELÓDICOS (AudioContext)
-        // ===========================================================
+        // ============================================
         function playSuccessSound() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -917,9 +819,9 @@
             } catch(e) { console.log("Audio Web no soportado."); }
         }
 
-        // ===========================================================
+        // ============================================
         // CÁLCULO DE DISTANCIA (FÓRMULA HAVERSINE)
-        // ===========================================================
+        // ============================================
         function calcularDistancia(lat1, lon1, lat2, lon2) {
             const R = 6371000;
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -931,9 +833,9 @@
             return R * c; 
         }
 
-        // ===========================================================
+        // ============================================
         // ESTADO DE INTELIGENCIA ARTIFICIAL Y EMOCIONES
-        // ===========================================================
+        // ============================================
         let iaCargada = false;
         let faceMatcher = null;
         let scannerActivo = false;
@@ -999,9 +901,9 @@
             }
         }
 
-        // ===========================================================
+        // ============================================
         // LÓGICA DE BASE DE DATOS BÁSICA
-        // ===========================================================
+        // ============================================
         database.ref('personas').on('value', (s) => { 
             db.personas = s.val() || {}; 
             renderAlumnos(); 
@@ -1020,9 +922,9 @@
             renderGeolocalizacion();
         });
 
-        // ===========================================================
+        // ============================================
         // REGISTRO DE USUARIOS (MULTI-PERFIL / FUSIÓN IA)
-        // ===========================================================
+        // ============================================
         let regDescriptors = [];
         let regPhase = 0;
         let regStream = null;
@@ -1049,13 +951,13 @@
             regDescriptors = [];
             regPhase = 1;
             
-            const btn = document.getElementById('btnCaptureProfile');
-            btn.innerText = "📸 Capturar Frente (0/4)";
-            btn.disabled = false;
+            const btnCapture = document.getElementById('btnCaptureProfile');
+            btnCapture.innerText = "📸 Capturar Frente (0/4)";
+            btnCapture.disabled = false;
             
-            const instr = document.getElementById('reg-instructions');
-            instr.innerText = "Paso 1: Mire fijamente a la cámara y presione Capturar.";
-            instr.style.color = "var(--accent-primary)";
+            const inst = document.getElementById('reg-instructions');
+            inst.innerText = "Paso 1: Mire fijamente a la cámara y presione Capturar.";
+            inst.style.color = "var(--accent-primary)";
             
             try {
                 regStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
@@ -1063,9 +965,7 @@
                 video.srcObject = regStream;
                 document.getElementById('reg-cam-container').classList.add('active', 'scanning');
                 video.addEventListener('play', loopRegPub);
-            } catch (e) {
-                alert("Error al acceder a la cámara. Verifique los permisos del navegador.");
-            }
+            } catch (e) { alert("Error al acceder a la cámara. Verifique los permisos del navegador."); }
         }
 
         async function loopRegPub() {
@@ -1103,24 +1003,24 @@
             regPhase++;
             
             const btn = document.getElementById('btnCaptureProfile');
-            const instr = document.getElementById('reg-instructions');
+            const inst = document.getElementById('reg-instructions');
             
             if(regPhase === 2) {
                 btn.innerText = "📸 Capturar Izquierda (1/4)";
-                instr.innerText = "Paso 2: Gire levemente su rostro a la IZQUIERDA y presione Capturar.";
+                inst.innerText = "Paso 2: Gire levemente su rostro a la IZQUIERDA y presione Capturar.";
             } else if(regPhase === 3) {
                 btn.innerText = "📸 Capturar Derecha (2/4)";
-                instr.innerText = "Paso 3: Gire levemente su rostro a la DERECHA y presione Capturar.";
+                inst.innerText = "Paso 3: Gire levemente su rostro a la DERECHA y presione Capturar.";
             } else if(regPhase === 4) {
                 btn.innerText = "📸 Capturar Sonrisa/Arriba (3/4)";
-                instr.innerText = "Paso 4: Sonría o mire levemente hacia ARRIBA y presione Capturar.";
+                inst.innerText = "Paso 4: Sonría o mire levemente hacia ARRIBA y presione Capturar.";
             } else if(regPhase === 5) {
                 btn.innerText = "✅ Capturas Completas (4/4)";
                 btn.disabled = true;
                 btn.classList.replace('btn-m', 'btn-s');
                 
-                instr.innerText = "¡Excelente! 4 perfiles biométricos capturados. Ahora haga clic en Guardar Registro.";
-                instr.style.color = "var(--accent-success)";
+                inst.innerText = "¡Excelente! 4 perfiles biométricos capturados. Ahora haga clic en Guardar Registro.";
+                inst.style.color = "var(--accent-success)";
                 
                 document.getElementById('btnSaveRegistry').disabled = false;
                 
@@ -1137,13 +1037,13 @@
             const phone = document.getElementById('regPhone').value.trim();
             const studentId = document.getElementById('regStudentId').value.trim();
             
-            // Calcular descriptor promedio (4 capturas)
             let avgDesc = new Float32Array(128);
             for(let i=0; i<128; i++) {
                 let sum = 0;
                 for(let j=0; j<4; j++) { sum += regDescriptors[j][i]; }
                 avgDesc[i] = sum / 4;
             }
+            
             const finalDescArray = Array.from(avgDesc);
             
             const newUser = {
@@ -1156,7 +1056,6 @@
             
             database.ref('personas/' + id).update(newUser);
             
-            // Enlazar padres si corresponde
             if (rol === 'Padre/Encargado' && studentId) {
                 if (db.personas[studentId]) {
                     const stu = db.personas[studentId];
@@ -1165,15 +1064,14 @@
                     } else {
                         database.ref('personas/' + studentId + '/descriptorPadre2').set(finalDescArray);
                     }
-                    alert(`✅ Registro exitoso.\n\nSe ha creado su perfil y se enlazó como encargado del estudiante ${studentId}.`);
+                    alert(`✅ Registro exitoso.\n\nSe ha creado su perfil y además se ha enlazado automáticamente como encargado del estudiante con cédula ${studentId}.`);
                 } else {
-                    alert("⚠️ Perfil guardado, pero el ID del estudiante no existe. Pida al admin que haga el enlace manualmente.");
+                    alert("⚠️ Su registro facial ha sido guardado exitosamente.\n\nSin embargo, el ID del estudiante proporcionado no existe en el sistema. Deberá solicitar a administración que realice el enlace manualmente.");
                 }
             } else {
-                alert("✅ Registro completado y almacenado exitosamente en la nube.");
+                alert("✅ Registro completado y almacenado exitosamente en la nube con tecnología multi-perfil.");
             }
             
-            // Limpiar formulario
             document.getElementById('regId').value = '';
             document.getElementById('regName').value = '';
             document.getElementById('regRole').value = '';
@@ -1183,16 +1081,16 @@
             document.getElementById('regStudentId').style.display = 'none';
             document.getElementById('btnSaveRegistry').disabled = true;
             document.getElementById('btnCaptureProfile').classList.replace('btn-s', 'btn-m');
-            document.getElementById('reg-instructions').innerText = "Llene sus datos personales y presione \"1️⃣ Iniciar Cámara\".";
+            document.getElementById('reg-instructions').innerText = "Llene sus datos personales y presione '1️⃣ Iniciar Cámara'.";
             document.getElementById('reg-instructions').style.color = "var(--accent-warning)";
             
             cerrarVistaProtegida('register-view');
             construirFaceMatcher();
         }
 
-        // ===========================================================
+        // ============================================
         // LÓGICA DE REGISTRO DE ASISTENCIA (GEOLOCALIZADA Y EMOCIONES)
-        // ===========================================================
+        // ============================================
         function registrarAsistenciaConGPS(id, strEmocion = "Neutral", emoticon = "😐") {
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition((pos) => {
@@ -1217,7 +1115,7 @@
                         playErrorSound();
                         
                         if(scannerActivo) toggleScanner();
-                        return; // No registrar en logs oficiales
+                        return; // Se aborta el registro de la asistencia oficial
                     }
 
                     completarEscaneoBD(id, hISO, esLejano, dist, strEmocion, emoticon);
@@ -1278,9 +1176,9 @@
             }
         }
 
-        // ===========================================================
+        // ============================================
         // ESCÁNER FACIAL PARA ASISTENCIA CON EMOCIONES
-        // ===========================================================
+        // ============================================
         async function toggleScanner() {
             const container = document.getElementById('scan-video-container');
             const btn = document.getElementById('btnCamaraMain');
@@ -1298,15 +1196,12 @@
                     video.addEventListener('play', loopReconocimiento);
                     actualizarEstadoIA("👁️ Escáner Activo. Alumno/Personal mire a la cámara.");
                     resetIdleTimer();
-                } catch (err) {
-                    alert("Error al acceder a la cámara.");
-                }
+                } catch (err) { alert("Error al acceder a la cámara."); }
             } else {
                 detenerCamaras();
                 container.classList.remove('active', 'scanning');
                 btn.innerText = "🟢 Iniciar Escáner"; btn.classList.replace('btn-d', 'btn-i');
-                scannerActivo = false; 
-                actualizarEstadoIA("IA en espera.");
+                scannerActivo = false; actualizarEstadoIA("IA en espera.");
                 resetIdleTimer();
             }
         }
@@ -1332,7 +1227,7 @@
                     const match = faceMatcher.findBestMatch(detection.descriptor);
                     
                     if(match.label !== 'unknown' && !match.label.includes('_p')) {
-                        // ----> EMOCIÓN PRINCIPAL
+                        // Determinar Emoción Principal
                         let emotionStr = "Neutral";
                         let emoticon = "😐";
                         if(detection.expressions) {
@@ -1362,9 +1257,9 @@
             setTimeout(loopReconocimiento, 150);
         }
 
-        // ===========================================================
+        // ============================================
         // ESCÁNER INTELIGENTE PARA VISTA DE CONSULTA (PADRES / ROSTRO)
-        // ===========================================================
+        // ============================================
         async function toggleQueryScanner() {
             const container = document.getElementById('query-video-container');
             const btn = document.getElementById('btnCamaraQuery');
@@ -1382,13 +1277,11 @@
                     video.addEventListener('play', loopConsultaFacial);
                     actualizarEstadoIA("👁️ Analizando rostro...");
                     resetIdleTimer();
-                } catch (err) {
-                    alert("Error al acceder a la cámara.");
-                }
+                } catch (err) { alert("Error al acceder a la cámara."); }
             } else {
                 detenerCamaras();
                 container.classList.remove('active', 'scanning');
-                btn.innerText = "📷 Iniciar Consulta Facial"; btn.classList.replace('btn-d', 'btn-m');
+                btn.innerText = "📷 Iniciar Consulta por Rostro"; btn.classList.replace('btn-d', 'btn-m');
                 queryScannerActivo = false;
                 resetIdleTimer();
             }
@@ -1475,9 +1368,9 @@
             clearTimeout(registroLoopId);
         }
 
-        // ===========================================================
+        // ============================================
         // REGISTRO FACIAL - ADMIN (MODIFICACIÓN RÁPIDA)
-        // ===========================================================
+        // ============================================
         async function abrirRegistroRostro(id, tipo = 'estudiante') {
             if(!iaCargada) await inicializarIA();
             idCapturaActual = id;
@@ -1492,16 +1385,13 @@
             document.getElementById('modal-student-name').innerText = `${persona.nombre} (${id})`;
             document.getElementById('face-modal').style.display = 'flex';
             document.getElementById('btnCaptureFace').disabled = true;
-            document.getElementById('reg-status').innerText = "Buscando rostro..."; 
-            document.getElementById('reg-status').style.color = "var(--accent-warning)";
+            document.getElementById('reg-status').innerText = "Buscando rostro..."; document.getElementById('reg-status').style.color = "var(--accent-warning)";
             try {
                 streamActual = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 const video = document.getElementById('reg-video'); video.srcObject = streamActual;
                 video.addEventListener('play', loopCapturaAdmin);
                 resetIdleTimer();
-            } catch (err) {
-                alert("Error con la cámara."); cerrarFaceModal();
-            }
+            } catch (err) { alert("Error con la cámara."); cerrarFaceModal(); }
         }
 
         async function loopCapturaAdmin() {
@@ -1515,17 +1405,11 @@
 
             if(detection) {
                 const resized = faceapi.resizeResults(detection, displaySize);
-                faceapi.draw.drawDetections(canvas, resized); 
-                faceapi.draw.drawFaceLandmarks(canvas, resized);
+                faceapi.draw.drawDetections(canvas, resized); faceapi.draw.drawFaceLandmarks(canvas, resized);
                 descriptorDetectado = Array.from(detection.descriptor);
-                btn.disabled = false; 
-                status.innerText = "✅ Rostro detectado. ¡Puede guardar!"; 
-                status.style.color = "var(--accent-success)";
+                btn.disabled = false; status.innerText = "✅ Rostro detectado. ¡Puede guardar!"; status.style.color = "var(--accent-success)";
             } else {
-                descriptorDetectado = null; 
-                btn.disabled = true; 
-                status.innerText = "Mire a la cámara..."; 
-                status.style.color = "var(--accent-warning)";
+                descriptorDetectado = null; btn.disabled = true; status.innerText = "Mire a la cámara..."; status.style.color = "var(--accent-warning)";
             }
             registroLoopId = setTimeout(loopCapturaAdmin, 200);
         }
@@ -1539,17 +1423,15 @@
                 } else if (tipoCapturaActual === 'padre2') {
                     db.personas[idCapturaActual].descriptorPadre2 = descriptorDetectado;
                 }
-                sincronizarConNube(); 
-                alert("Rostro facial guardado exitosamente en la nube.");
-                cerrarFaceModal(); 
-                construirFaceMatcher();
+                sincronizarConNube(); alert("Rostro facial guardado exitosamente en la nube.");
+                cerrarFaceModal(); construirFaceMatcher();
             }
         }
         function cerrarFaceModal() { document.getElementById('face-modal').style.display = 'none'; detenerCamaras(); idCapturaActual = null; descriptorDetectado = null; resetIdleTimer(); }
 
-        // ===========================================================
+        // ============================================
         // FUNCIONES DE ADMINISTRADOR Y TABLAS
-        // ===========================================================
+        // ============================================
         function renderAlumnos() {
             const t = document.getElementById('tablaAlumnos'); t.innerHTML = "";
             const hISO = new Date().toLocaleDateString('sv-SE');
@@ -1600,7 +1482,7 @@
             });
         }
 
-        // HISTORIAL DE ESCANEOS LEJANOS (GEO)
+        // TABLA: Historial de Escaneos Lejanos
         function renderGeolocalizacion() {
             const tbody = document.getElementById('tablaLogsLejanos');
             tbody.innerHTML = "";
@@ -1634,7 +1516,7 @@
             }
         }
 
-        // Botones superiores del panel maestro
+        // --- Botones Superiores de Administración ---
         function editarNumeroJunta() { let n = prompt("Número de contacto general para WhatsApp:", NUMERO_OFICIAL_JUNTA); if(n) { database.ref('config/numeroOficial').set(n); alert("Actualizado."); } }
         
         function procesarSubidaFondo(event) {
@@ -1717,8 +1599,8 @@
                     <p><b>Versión:</b> Sistema Facial Inteligente 3.5 (Geocerca Activa y Firebase Auth)</p>
                 </div>
             `;
-            let win = window.open('', 'Configuración de Sistema', 'width=400,height=300');
-            win.document.write(`<html><head><title>Configuración</title><style>body{font-family:sans-serif; padding:20px; background:#f0f4f8;}.btn{padding:8px 12px; margin-right:5px; cursor:pointer; font-weight:bold; border-radius:5px; border:none;}.btn-m{background:#00d9ff; color:#0a0e27;}.btn-s{background:#00ff88; color:#0a0e27;}</style></head><body>`);
+            let win = window.open("", "Configuración de Sistema", "width=400,height=300");
+            win.document.write(`<html><head><title>Configuración</title><style>body{font-family:sans-serif; padding:20px; background:#f0f4f8;}.btn{padding:8px 12px; margin-right:5px; cursor:pointer; font-weight:bold; border-radius:5px; border:none;} .btn-m{background:#00d9ff;} .btn-s{background:#00ff88;}</style></head><body>`);
             win.document.write(configDiv.innerHTML);
             win.document.write(`<script>
                 function setTheme(theme) {
@@ -1752,14 +1634,14 @@
             alert("Ubicación y Geocerca configuradas de forma exitosa.\n\nRecuerde: Ahora cualquier escaneo que exceda el radio será almacenado en el 'Historial Lejano' y su Asistencia Oficial será rechazada.");
         }
 
-        // --- Miembros ---
+        // --- Barra de Herramientas Miembros ---
         function agregarMiembroManual() { 
             const id = prompt("Cédula/Código nuevo:"); 
             if(id) { 
                 db.personas[id] = { 
                     nombre: prompt("Nombre Completo:"), 
-                    puesto: prompt("Sección/Puesto/Motivo:"), 
-                    telefono: prompt("WhatsApp:"), 
+                    puesto: prompt("Sección/Motivo:"), 
+                    telefono: prompt("WhatsApp:"),
                     tipoUsuario: 'Estudiante'
                 }; 
                 renderAlumnos(); 
@@ -1806,7 +1688,7 @@
             });
 
             doc.autoTable({ 
-                head: [['Código/Cédula', 'Rol', 'Nombre Completo', 'Sección/Motivo', 'WhatsApp', 'Rostros IA']],
+                head: [['Código/Cédula', 'Rol', 'Nombre Completo', 'Sección/Dato', 'WhatsApp', 'Rostros IA']],
                 body: bodyData,
                 startY: 30,
                 theme: 'grid',
@@ -1842,49 +1724,24 @@
             }
         }
 
-        // --- Generación de carnés QR ---
+        // --- Generación de Carnés QR ---
         function descargarCarnet(id) {
             const p = db.personas[id];
-            const win = window.open('','',`width=350,height=500`);
-            win.document.write(`<html><head><title>Carné ${id}</title><style>
-                body{font-family:sans-serif;background:#0a0e27;color:#e8eef5;margin:0;padding:0;display:flex;align-items:center;justify-content:center;height:100vh;}
-                .card{width:280px;height:420px;background:#1a1f3a;border-radius:12px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,0.5);color:#e8eef5;position:relative;}
-                .header{background:#00d9ff;padding:15px;text-align:center;font-weight:bold;color:#0a0e27;font-size:1.2rem;}
-                .qr-container{background:#1a1f3a;padding:15px;border-radius:10px;margin:20px auto;width:150px;}
-                .info{text-align:center;margin-top:15px;}
-                .info .id{font-size:1.6rem;font-weight:900;color:#00d9ff;margin:10px 0;}
-                .footer{position:absolute;bottom:0;width:100%;height:15px;background:linear-gradient(90deg,#00d9ff 33%,#1a1f3a 33%,#1a1f3a 66%,#ff4444 66%);}
-                </style></head><body>
-                <div class="card">
-                    <div class="header">ESCUELA LA CARPIO<br><span style="font-size:0.8rem; font-weight:normal;">${p.tipoUsuario || 'Estudiante'}</span></div>
-                    <div class="qr-container"><div id="q"></div></div>
-                    <div class="info">
-                        <div class="id">${id}</div>
-                        <div style="font-weight:bold;font-size:1.2rem;">${p.nombre}</div>
-                        <div style="color:#a8b2c1;margin-top:5px;">${p.puesto||''}</div>
-                    </div>
-                    <div class="footer"></div>
-                </div>
-                <script>new QRCode(document.getElementById("q"),{text:"${id}",width:130,height:130});setTimeout(()=>window.print(),800);<\/script>
-                </body></html>`);
+            const win = window.open('','','width=350,height=500');
+            win.document.write(`<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#0a0e27;}.card{width:280px;height:420px;background:#1a1f3a;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.5);overflow:hidden;position:relative;border:1px solid #2a3250;}.header{background:#00d9ff;height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#0a0e27;text-align:center;font-weight:bold;}.qr-container{background:#1a1f3a;padding:15px;border-radius:10px;margin-top:20px;display:inline-block;border:1px solid #2a3250;}.info{padding:20px;text-align:center;color:#e8eef5;}.id-label{font-size:1.6rem;font-weight:900;color:#00d9ff;margin:10px 0;}.footer{position:absolute;bottom:0;width:100%;height:15px;background:linear-gradient(90deg,#00d9ff 33%,#1a1f3a 33%,#1a1f3a 66%,#ff4444 66%);}</style></head><body><div class="card"><div class="header">ESCUELA LA CARPIO<br><span style="font-size:0.8rem; font-weight:normal;">${p.tipoUsuario || 'Estudiante'}</span></div><div style="text-align:center;"><div class="qr-container"><div id="q"></div></div></div><div class="info"><div class="id-label">${id}</div><div style="font-weight:bold;font-size:1.2rem;">${p.nombre}</div><div style="color:#a8b2c1;margin-top:5px;">${p.puesto||''}</div></div><div class="footer"></div></div><script>new QRCode(document.getElementById("q"),{text:"${id}",width:140,height:140});setTimeout(()=>window.print(),800);<\/script></body></html>`);
             win.document.close();
         }
 
         function imprimirTodosLosCarnets() {
-            const win = window.open('',''); win.document.write(`<html><head><title>Impresión de Carnés</title><style>
-                @media print { div{page-break-inside:avoid;} }
-                .card{width:200px;border:1px solid #333;padding:10px;text-align:center;display:inline-block;margin:5px;font-family:sans-serif;background:#1a1f3a;color:#e8eef5;}
-                </style></head><body>`);
-            Object.entries(db.personas).forEach(([id,p]) => {
-                win.document.write(`<div class="card"><div id="qr-${id.replace(/\W/g,'')}"></div><br><b style="font-size:1.2rem;">${id}</b><br>${p.nombre}<br><small>${p.tipoUsuario||'Estudiante'} - ${p.puesto||''}</small></div>`);
-            });
-            win.document.write(`<script>${Object.keys(db.personas).map(id => `new QRCode(document.getElementById("qr-${id.replace(/\\W/g,'')}"),{text:"${id}",width:100,height:100});`).join('\n')} setTimeout(()=>window.print(),1500);<\/script></body></html>`);
+            const win = window.open('',''); win.document.write(`<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script></head><body><style>@media print { div { page-break-inside: avoid; } }</style>`);
+            Object.entries(db.personas).forEach(([id,p]) => { win.document.write(`<div style="width:200px;border:1px solid #333;padding:10px;text-align:center;display:inline-block;margin:5px;font-family:sans-serif;"><div id="qr-${id.replace(/\W/g,'')}"></div><br><b style="font-size:1.2rem;">${id}</b><br>${p.nombre}<br><small>${p.tipoUsuario||'Estudiante'} - ${p.puesto||''}</small></div>`); });
+            win.document.write(`<script>${Object.keys(db.personas).map(id => `new QRCode(document.getElementById("qr-${id.replace(/\\W/g,'')}\"),{text:"${id}",width:100,height:100});`).join('\n')} setTimeout(()=>window.print(),1500);<\/script></body></html>`);
             win.document.close();
         }
 
-        // ===========================================================
+        // ============================================
         // VISTAS Y REPORTES
-        // ===========================================================
+        // ============================================
         function mostrarVista(id) { 
             document.getElementById('home-view').style.display = (id==='home-view')?'flex':'none'; 
             document.getElementById('scan-view').style.display = (id==='scan-view')?'flex':'none'; 
@@ -1913,7 +1770,7 @@
             document.getElementById('tab2').className = (n===2)?'tab-btn active':'tab-btn'; 
             document.getElementById('tab3').className = (n===3)?'tab-btn active':'tab-btn'; 
         }
-
+        
         function filtrarRapido() { let f = document.getElementById('busqueda').value.toUpperCase(); let rows = document.getElementById("tablaAlumnos").getElementsByTagName("tr"); for (let i = 0; i < rows.length; i++) { rows[i].style.display = (rows[i].textContent.toUpperCase().indexOf(f) > -1) ? "" : "none"; } }
 
         function consultarPadre() {
@@ -1928,8 +1785,8 @@
             document.getElementById('parentStudentName').innerText = p.nombre;
             document.getElementById('parentStudentPuesto').innerText = (p.tipoUsuario || "Perfil") + " / " + (p.puesto || "N/A");
             document.getElementById('btnConsultaWA').onclick = () => { 
-                const mensaje = encodeURIComponent(`Hola, quisiera realizar una consulta sobre el usuario: ${p.nombre} (ID: ${id}).`);
-                window.open(`https://wa.me/506${NUMERO_OFICIAL_JUNTA}?text=${mensaje}`, '_blank');
+                const mensaje = `Hola, quisiera realizar una consulta sobre el usuario: ${p.nombre} (ID: ${id}).`;
+                window.open(`https://wa.me/506${NUMERO_OFICIAL_JUNTA}?text=${encodeURIComponent(mensaje)}`, '_blank');
             };
             
             database.ref('logs').orderByChild('id').equalTo(id).once('value', (s) => {
@@ -1969,7 +1826,7 @@
             cuerpo.innerHTML = "";
             let logsDelDia = logsGlobal.filter(l => l.fechaISO ? l.fechaISO === fechaBuscada : coincideFecha(l.hora, fechaBuscada));
 
-            if (tipo === 'ENTRADA' || tipo === 'SALIDA') {
+            if(tipo === 'ENTRADA' || tipo === 'SALIDA') {
                 titulo.innerText = tipo === 'ENTRADA' ? `✅ Llegaron` : `🚪 Salieron`;
                 head.innerHTML = `<tr><th>Hora</th><th>Identificación</th><th>Nombre</th><th>Sección</th><th>Emoción</th><th>Estado Distancia</th></tr>`;
                 logsDelDia.filter(l => l.tipo === tipo).forEach(l => {
@@ -1978,7 +1835,7 @@
                     let emoInfo = l.emoticon ? `<span style="font-size:1.2rem;" title="${l.emocion}">${l.emoticon}</span>` : '😐';
                     cuerpo.insertAdjacentHTML('beforeend', `<tr><td>${h}</td><td><b>${l.id}</b></td><td>${l.nombre}</td><td>${p.puesto || '-'}</td><td>${emoInfo}</td><td>${estDist}</td></tr>`);
                 });
-            } else if (tipo === 'TODOS') {
+            } else if(tipo === 'TODOS') {
                 titulo.innerText = `📋 Todos los Movimientos`;
                 head.innerHTML = `<tr><th>Hora</th><th>Identificación</th><th>Nombre</th><th>Tipo</th><th>Sección</th><th>Emoción</th><th>Estado Distancia</th></tr>`;
                 logsDelDia.filter(l => l.tipo !== 'JUSTIFICADA').forEach(l => {
@@ -2025,7 +1882,7 @@
 
         function mostrarAyuda(t) { alert("SISTEMA DE ASISTENCIA FACIAL CON GEOCERCA\n\n1. Asegúrate de estar dentro del rango geográfico configurado en la escuela.\n2. Presiona 'Iniciar Escáner'.\n3. Mire a la cámara para guardar la asistencia.\n4. El sistema emitirá una melodía de éxito y desactivará la cámara automáticamente para la siguiente persona."); }
 
-        // Inicializar vista por defecto (pantalla inactiva)
+        // Inicializar vista por defecto en pantalla inactiva
         mostrarVista('home-view');
         resetIdleTimer();
     </script>
