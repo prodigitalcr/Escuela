@@ -10,18 +10,19 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- Firebase v8 (compatibilidad con el sitio principal) -->
+    <!-- Firebase App (Compatibilidad v8 para coincidir con el sitio principal) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
-        .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4,0,0.2,1); transition-duration:300ms; }
+        /* Transiciones suaves */
+        .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms; }
     </style>
 </head>
 <body class="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
 
-    <!-- ==== OVERLAY DE LOGIN ==== -->
+    <!-- OVERLAY DE LOGIN SAAS -->
     <div id="saasLoginOverlay" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center transition-opacity duration-300">
         <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4">
             <div class="flex justify-center mb-6">
@@ -49,7 +50,7 @@
         </div>
     </div>
 
-    <!-- ==== SIDEBAR ==== -->
+    <!-- Sidebar -->
     <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0 md:static md:inset-0 flex flex-col">
         <div class="flex items-center justify-between h-16 px-6 bg-slate-950">
             <span class="text-xl font-bold text-white tracking-wider flex items-center gap-2">
@@ -60,6 +61,7 @@
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
+        
         <nav class="p-4 space-y-2 flex-1">
             <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-indigo-600 text-white">
                 <i data-lucide="bar-chart" class="w-5 h-5"></i> Vista General
@@ -68,6 +70,7 @@
                 <i data-lucide="building-2" class="w-5 h-5"></i> Escuelas (Inquilinos)
             </button>
         </nav>
+
         <div class="p-4 border-t border-slate-800">
             <button onclick="cerrarSesionSaaS()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-red-900/50 text-red-400 hover:text-red-300">
                 <i data-lucide="log-out" class="w-5 h-5"></i> Cerrar Sesión
@@ -75,17 +78,21 @@
         </div>
     </aside>
 
-    <!-- ==== MAIN ==== -->
+    <!-- Main Content -->
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        
+        <!-- Header -->
         <header class="flex items-center justify-between h-16 px-4 bg-white border-b border-slate-200 sm:px-6 lg:px-8 shrink-0">
             <button id="openSidebar" class="text-slate-500 hover:text-slate-700 md:hidden">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
+            
             <div class="flex-1 px-4 flex justify-end sm:justify-between items-center">
                 <div class="hidden sm:block max-w-xs w-full relative">
                     <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
                     <input type="text" id="searchInput" onkeyup="filtrarTablaEscuelas()" placeholder="Buscar escuela o ID..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
                 </div>
+                
                 <div class="flex items-center gap-4">
                     <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm cursor-pointer shadow-md" title="Administrador SaaS">
                         SA
@@ -94,13 +101,16 @@
             </div>
         </header>
 
+        <!-- Content Area -->
         <div class="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 relative">
-            <!-- ==== DASHBOARD ==== -->
+            
+            <!-- CONTENIDO: DASHBOARD -->
             <div id="tab-dashboard" class="space-y-6 max-w-7xl mx-auto block">
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900">Vista General del SaaS</h1>
                     <p class="text-slate-500 text-sm mt-1">Métricas en tiempo real de todas tus instancias alquiladas.</p>
                 </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
                         <div class="p-3 rounded-lg bg-indigo-100"><i data-lucide="building" class="w-6 h-6 text-indigo-600"></i></div>
@@ -133,12 +143,12 @@
                 </div>
             </div>
 
-            <!-- ==== ESCUELAS ==== -->
+            <!-- CONTENIDO: ESCUELAS -->
             <div id="tab-escuelas" class="space-y-6 max-w-7xl mx-auto hidden">
                 <div class="flex justify-between items-end">
                     <div>
                         <h1 class="text-2xl font-bold text-slate-900">Gestión de Escuelas (Inquilinos)</h1>
-                        <p class="text-slate-500 text-sm mt-1">Controla el acceso y estado de las plataformas conectadas a tu Firebase.</p>
+                        <p class="text-slate-500 text-sm mt-1">Controla el acceso y partición de datos por inquilino.</p>
                     </div>
                     <button onclick="openAddSchoolModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 shadow-sm">
                         <i data-lucide="plus" class="w-4 h-4"></i> Nueva Escuela
@@ -150,46 +160,55 @@
                         <table class="w-full text-sm text-left">
                             <thead class="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
                                 <tr>
-                                    <th class="px-6 py-4">Institución / URL</th>
-                                    <th class="px-6 py-4">Representante / Acceso</th>
-                                    <th class="px-6 py-4">Suscripción (Inicio - Fin)</th>
+                                    <th class="px-6 py-4">Institución / Dominio</th>
+                                    <th class="px-6 py-4">Director / Acceso UID</th>
+                                    <th class="px-6 py-4">Suscripción</th>
                                     <th class="px-6 py-4">Estado del Sitio</th>
-                                    <th class="px-6 py-4 text-right">Acciones</th>
+                                    <th class="px-6 py-4 text-right">Acciones de Control</th>
                                 </tr>
                             </thead>
                             <tbody id="schools-table-body" class="divide-y divide-slate-100">
-                                <!-- Generado dinámicamente -->
+                                <!-- Las filas se generan con JavaScript -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
+
         </div>
     </main>
 
-    <!-- ==== MODAL DE NUEVA ESCUELA ==== -->
+    <!-- Modal para Agregar Escuela -->
     <div id="addSchoolModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 flex items-center justify-center overflow-y-auto">
         <div class="bg-white rounded-xl shadow-xl p-6 max-w-2xl w-full mx-4 my-8 transform scale-95 opacity-0 transition-all" id="addSchoolModalContent">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-slate-900">Registrar Nueva Institución</h3>
+                <h3 class="text-xl font-bold text-slate-900">Crear Inquilino (Base de datos limpia)</h3>
                 <button type="button" onclick="closeAddSchoolModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
+            
             <form id="addSchoolForm" onsubmit="submitNewSchool(event)" class="space-y-4">
+                <div class="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-3 text-sm mb-4 flex gap-3">
+                    <i data-lucide="info" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                    <p>Al guardar, se creará un espacio en blanco aislado en <code>/tenant_data/{ID}</code> listo para que el director suba su CSV la primera vez que inicie sesión.</p>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-1 md:col-span-2">
-                        <label class="text-sm font-medium text-slate-700">ID del Tenant (Único, ej: escuela-carpio)</label>
+                        <label class="text-sm font-medium text-slate-700">ID del Tenant (Único, sin espacios)</label>
                         <input type="text" id="schoolId" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-slate-50">
                     </div>
+
                     <div class="space-y-1">
                         <label class="text-sm font-medium text-slate-700">Nombre de la Institución</label>
                         <input type="text" id="schoolName" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                     <div class="space-y-1">
-                        <label class="text-sm font-medium text-slate-700">URL del Sitio Principal</label>
-                        <input type="text" id="schoolUrl" required placeholder="ej. mipagina.com o 127.0.0.1" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <label class="text-sm font-medium text-slate-700">URL del Sitio Cliente</label>
+                        <input type="url" id="schoolUrl" required placeholder="https://mi-escuela.com" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
+                    
                     <div class="space-y-1">
-                        <label class="text-sm font-medium text-slate-700">Nombre del Representante (Director)</label>
+                        <label class="text-sm font-medium text-slate-700">Nombre del Director</label>
                         <input type="text" id="schoolRep" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                     <div class="space-y-1">
@@ -197,13 +216,12 @@
                         <input type="email" id="schoolEmail" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                     <div class="space-y-1 md:col-span-2">
-                        <label class="text-sm font-medium text-slate-700">Firebase UID del Director (Vinculación)</label>
-                        <input type="text" id="schoolUid" required placeholder="Ej: GhWXyBqMR4cCNhw2vOpnrTRQLbi2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <label class="text-sm font-medium text-slate-700">Firebase UID del Director</label>
+                        <input type="text" id="schoolUid" required placeholder="Ej: GhWXyBqMR4cCNhw..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
 
-                    <!-- Suscripción -->
                     <div class="space-y-1">
-                        <label class="text-sm font-medium text-slate-700">Monto de Suscripción ($)</label>
+                        <label class="text-sm font-medium text-slate-700">Monto ($)</label>
                         <input type="number" id="schoolAmount" required min="0" step="0.01" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                     <div class="space-y-1">
@@ -214,48 +232,50 @@
                         </select>
                     </div>
                     <div class="space-y-1">
-                        <label class="text-sm font-medium text-slate-700">Fecha de Inicio</label>
+                        <label class="text-sm font-medium text-slate-700">Inicio</label>
                         <input type="date" id="schoolStart" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                     <div class="space-y-1">
-                        <label class="text-sm font-medium text-slate-700">Fecha de Vencimiento</label>
+                        <label class="text-sm font-medium text-slate-700">Vencimiento</label>
                         <input type="date" id="schoolEnd" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     </div>
                 </div>
+                
                 <div class="flex gap-3 justify-end mt-6 pt-4 border-t border-slate-200">
                     <button type="button" onclick="closeAddSchoolModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Guardar en Firebase</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Crear Instancia Multi-Tenant</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ==== MODAL DE CONFIRMACIÓN DE ESTADO ==== -->
+    <!-- Modal de confirmación de Bloqueo/Estado -->
     <div id="statusModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 flex items-center justify-center">
         <div class="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4 transform scale-95 opacity-0 transition-all" id="modalContent">
             <div class="flex items-center gap-4 mb-4">
                 <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
                     <i data-lucide="alert-circle" class="w-6 h-6 text-yellow-600"></i>
                 </div>
-                <h3 class="text-lg font-bold text-slate-900">Cambiar estado del sitio</h3>
+                <h3 class="text-lg font-bold text-slate-900">Aplicar Reglas de Bloqueo</h3>
             </div>
-            <p class="text-slate-600 text-sm mb-6" id="modalText">¿Estás seguro de que deseas cambiar el estado de esta escuela en la base de datos?</p>
+            <p class="text-slate-600 text-sm mb-6" id="modalText"></p>
+            <div class="bg-slate-50 border border-slate-200 rounded p-3 text-xs text-slate-500 mb-6 font-mono" id="technicalActions">
+                <!-- Se llena dinámicamente -->
+            </div>
+
             <div class="flex gap-3 justify-end">
                 <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
                 <button id="confirmStatusBtn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center gap-2">
-                    <i data-lucide="database" class="w-4 h-4"></i> Confirmar Cambio
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i> Aplicar Cambios
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ==================================================== -->
-    <!-- ====  SCRIPT – LÓGICA DEL PANEL MASTER (REACTUALIZADO) ==== -->
-    <!-- ==================================================== -->
     <script>
-        // --------------------------------------------------------------------
-        // CONFIGURACIÓN FIREBASE (igual que antes)
-        // --------------------------------------------------------------------
+        // ============================================
+        // CONFIGURACIÓN FIREBASE 
+        // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBpGu9Bnr5pQhNBK4kYpoh4GuLkR4CED4c",
             authDomain: "escuela-la-carpio.firebaseapp.com",
@@ -266,21 +286,21 @@
             appId: "1:163331007154:web:2465b1068d6b356cbadfab",
             measurementId: "G-8EBFX04XVC"
         };
+        
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const auth     = firebase.auth();
+        const auth = firebase.auth();
 
-        // UID del administrador SaaS (master)
+        // UID Obligatorio del SaaS Master
         const SAAS_ADMIN_UID = "VYwn6Cy7u8XprETeRgI51YmjKQq2";
 
-        // Estado local
-        let schools = [];               // lista de inquilinos
-        let pendingStatusChange = null; // guardará la solicitud de cambio de estado
+        let schools = [];
+        let pendingStatusChange = null;
 
-        // --------------------------------------------------------------------
-        // AUTENTICACIÓN
-        // --------------------------------------------------------------------
-        auth.onAuthStateChanged(user => {
+        // ============================================
+        // AUTENTICACIÓN SAAS
+        // ============================================
+        auth.onAuthStateChanged((user) => {
             const overlay = document.getElementById('saasLoginOverlay');
             if (user) {
                 if (user.uid === SAAS_ADMIN_UID) {
@@ -288,10 +308,9 @@
                     setTimeout(() => overlay.classList.add('hidden'), 300);
                     escucharDatosFirebase();
                 } else {
-                    // No es el admin master → cerrar sesión y mostrar error
                     auth.signOut().then(() => {
                         const err = document.getElementById('loginError');
-                        err.innerText = "Acceso Denegado. Esta cuenta no tiene privilegios Master SaaS.";
+                        err.innerText = "Acceso Denegado. Se requiere cuenta Master.";
                         err.classList.remove('hidden');
                         overlay.classList.remove('hidden');
                         overlay.style.opacity = '1';
@@ -306,341 +325,265 @@
         function iniciarSesionSaaS(e) {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value.trim();
-            const pass  = document.getElementById('loginPass').value;
-            const btn   = document.getElementById('loginBtn');
-            const err   = document.getElementById('loginError');
-
+            const pass = document.getElementById('loginPass').value;
+            const btn = document.getElementById('loginBtn');
+            const err = document.getElementById('loginError');
+            
             btn.innerText = "Autenticando...";
-            btn.disabled   = true;
+            btn.disabled = true;
             err.classList.add('hidden');
 
-            auth.signInWithEmailAndPassword(email, pass)
-                .catch(error => {
-                    err.innerText = "Error: " + error.message;
-                    err.classList.remove('hidden');
-                    btn.innerText = "Ingresar al Panel";
-                    btn.disabled   = false;
-                });
+            auth.signInWithEmailAndPassword(email, pass).catch((error) => {
+                err.innerText = "Error: " + error.message;
+                err.classList.remove('hidden');
+                btn.innerText = "Ingresar al Panel";
+                btn.disabled = false;
+            });
         }
 
-        function cerrarSesionSaaS() { auth.signOut(); }
-
-        // --------------------------------------------------------------------
-        // ----------- 1️⃣ CREAR NODO PRIVADO (tenantDB) --------------------
-        // --------------------------------------------------------------------
-        function initializeTenantDatabase(tenantId) {
-            // Nodo “privado” que se usará exclusivamente por la escuela.
-            // Está vacío y preparado para recibir datos desde un CSV.
-            const initData = {
-                blocked:   false,
-                createdAt: new Date().toISOString(),
-                records:   {}   // ← punto de partida para la importación CSV
-            };
-            return database.ref('tenantDB/' + tenantId).set(initData);
+        function cerrarSesionSaaS() {
+            auth.signOut();
         }
 
-        // --------------------------------------------------------------------
-        // ----------- 2️⃣ ESCUCHAR LOS TENANTS (público) -------------------
-        // --------------------------------------------------------------------
+        // ============================================
+        // LECTURA DE DATOS MULTI-TENANT
+        // ============================================
         function escucharDatosFirebase() {
-            database.ref('tenants').on('value', snapshot => {
+            database.ref('tenants').on('value', (snapshot) => {
                 schools = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        const d = child.val();
+                if(snapshot.exists()) {
+                    snapshot.forEach(childSnapshot => {
+                        const data = childSnapshot.val();
                         schools.push({
-                            id:        child.key,
-                            name:      d.name      || '',
-                            url:       d.url       || '',
-                            admin:     d.adminName || '',
-                            email:     d.adminEmail|| '',
-                            uid:       d.adminUid  || '',
-                            amount:    d.amount    || 0,
-                            period:    d.period    || '',
-                            startDate: d.startDate || '',
-                            endDate:   d.endDate   || '',
-                            status:    d.status    || 'bloqueado'
+                            id: childSnapshot.key,
+                            name: data.name || 'Sin nombre',
+                            url: data.url || '#',
+                            admin: data.adminName || 'No definido',
+                            email: data.adminEmail || '',
+                            uid: data.adminUid || '',
+                            amount: data.amount || 0,
+                            period: data.period || 'Mensual',
+                            startDate: data.startDate || '',
+                            endDate: data.endDate || '',
+                            status: data.status || 'bloqueado'
                         });
                     });
                 }
-                // Bloqueo automático por vencimiento antes de renderizar
-                autoBlockExpiredTenants();
                 renderSchoolsTable();
             });
         }
 
-        // --------------------------------------------------------------------
-        // ----------- 3️⃣ BLOQUEO AUTOMÁTICO POR VENCIMIENTO -------------
-        // --------------------------------------------------------------------
-        function autoBlockExpiredTenants() {
-            const hoy = new Date();
-            schools.forEach(s => {
-                const fin = new Date(s.endDate);
-                if (fin < hoy && s.status !== 'bloqueado') {
-                    // Cambia a bloqueado y marca el flag privado 'blocked'
-                    applyStatusChange(s.id, 'bloqueado')
-                        .catch(err => console.error('Auto‑block error: ', err));
-                }
-            });
-        }
-
-        // --------------------------------------------------------------------
-        // ----------- 4️⃣ APLICAR CAMBIO DE ESTADO (público + privado) -----
-        // --------------------------------------------------------------------
-        function applyStatusChange(tenantId, newStatus) {
-            const publicUpdates = {
-                status: newStatus,
-                lastStatusChange: new Date().toISOString()
-            };
-            const privateUpdates = {
-                blocked: newStatus === 'bloqueado',
-                ...(newStatus === 'bloqueado' && { blockedAt: new Date().toISOString() })
-            };
-            return Promise.all([
-                database.ref('tenants/' + tenantId).update(publicUpdates),
-                database.ref('tenantDB/' + tenantId).update(privateUpdates)
-            ]);
-        }
-
-        // --------------------------------------------------------------------
-        // ----------- 5️⃣ INTERFAZ (Sidebar, Tabs, etc.) -----------------
-        // --------------------------------------------------------------------
+        // ============================================
+        // INTERFAZ DE USUARIO
+        // ============================================
         lucide.createIcons();
 
         const sidebar = document.getElementById('sidebar');
-        document.getElementById('openSidebar').addEventListener('click', () => sidebar.classList.remove('-translate-x-full'));
-        document.getElementById('closeSidebar').addEventListener('click', () => sidebar.classList.add('-translate-x-full'));
+        document.getElementById('openSidebar').addEventListener('click', () => { sidebar.classList.remove('-translate-x-full'); });
+        document.getElementById('closeSidebar').addEventListener('click', () => { sidebar.classList.add('-translate-x-full'); });
 
         function switchTab(tabName) {
             document.getElementById('tab-dashboard').classList.add('hidden');
             document.getElementById('tab-escuelas').classList.add('hidden');
-
-            ['dashboard','escuelas'].forEach(nav => {
-                const el = document.getElementById('nav-'+nav);
-                if (el) el.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300';
+            
+            ['dashboard', 'escuelas'].forEach(nav => {
+                const el = document.getElementById('nav-' + nav);
+                if(el) el.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300';
             });
 
-            document.getElementById('tab-'+tabName).classList.remove('hidden');
-            const activeNav = document.getElementById('nav-'+tabName);
-            if (activeNav) activeNav.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-indigo-600 text-white';
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            const activeNav = document.getElementById('nav-' + tabName);
+            if(activeNav) activeNav.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-indigo-600 text-white';
 
-            if (tabName === 'escuelas') renderSchoolsTable();
+            if(tabName === 'escuelas') renderSchoolsTable();
         }
 
         const statusConfig = {
-            activo:       {label:'Activo',       color:'bg-green-100 text-green-800 border-green-200',       icon:'check-circle'},
-            moroso:       {label:'Moroso',       color:'bg-yellow-100 text-yellow-800 border-yellow-200',       icon:'alert-triangle'},
-            mantenimiento:{label:'Mantenimiento',color:'bg-blue-100 text-blue-800 border-blue-200',            icon:'tool'},
-            bloqueado:    {label:'Bloqueado',    color:'bg-red-100 text-red-800 border-red-200',                icon:'slash'}
+            'activo': { label: 'Activo', color: 'bg-green-100 text-green-800 border-green-200', icon: 'check-circle' },
+            'moroso': { label: 'Moroso', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: 'alert-triangle' },
+            'mantenimiento': { label: 'Mantenimiento', color: 'bg-blue-100 text-blue-800 border-blue-200', icon: 'tool' },
+            'bloqueado': { label: 'Bloqueado (URL/UID Inhabilitados)', color: 'bg-red-100 text-red-800 border-red-200', icon: 'slash' }
         };
 
         function updateStats() {
-            document.getElementById('stat-total').innerText      = schools.length;
-            document.getElementById('stat-active').innerText     = schools.filter(s=>s.status==='activo').length;
-            document.getElementById('stat-moroso').innerText     = schools.filter(s=>s.status==='moroso').length;
-            document.getElementById('stat-bloqueado').innerText = schools.filter(s=>s.status==='bloqueado').length;
+            document.getElementById('stat-total').innerText = schools.length;
+            document.getElementById('stat-active').innerText = schools.filter(s => s.status === 'activo').length;
+            document.getElementById('stat-moroso').innerText = schools.filter(s => s.status === 'moroso').length;
+            document.getElementById('stat-bloqueado').innerText = schools.filter(s => s.status === 'bloqueado').length;
         }
 
-        function renderSchoolsTable(filterText='') {
+        function renderSchoolsTable(filterText = '') {
             const tbody = document.getElementById('schools-table-body');
             tbody.innerHTML = '';
-
             const today = new Date();
-
-            schools.filter(s => 
-                s.name.toLowerCase().includes(filterText.toLowerCase()) ||
-                s.id  .toLowerCase().includes(filterText.toLowerCase())
-            ).forEach(school => {
+            
+            schools.filter(s => s.name.toLowerCase().includes(filterText.toLowerCase()) || s.id.toLowerCase().includes(filterText.toLowerCase()))
+            .forEach((school) => {
                 const st = statusConfig[school.status] || statusConfig['bloqueado'];
-                const endDate = new Date(school.endDate);
-                const isExpired = endDate < today && school.status !== 'bloqueado';
-
+                const isExpired = new Date(school.endDate) < today && school.status !== 'bloqueado';
+                
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition-colors group';
                 tr.innerHTML = `
                     <td class="px-6 py-4">
                         <div class="font-bold text-slate-900">${school.name}</div>
                         <div class="text-xs text-slate-500 mt-0.5 font-mono">ID: ${school.id}</div>
-                        <div class="text-[10px] text-indigo-600 flex items-center gap-1 font-mono"><i data-lucide="link" class="w-3 h-3"></i> ${school.url}</div>
+                        <a href="${school.url}" target="_blank" class="inline-flex items-center gap-1 mt-1 text-[11px] font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 transition-colors">
+                            <i data-lucide="external-link" class="w-3 h-3"></i> Abrir Sitio
+                        </a>
                     </td>
                     <td class="px-6 py-4">
                         <div class="text-sm font-medium text-slate-900">${school.admin}</div>
-                        <div class="text-xs text-slate-500">${school.email}</div>
-                        <div class="text-[10px] text-slate-400 font-mono mt-1" title="Firebase UID">UID: ${school.uid}</div>
+                        <div class="text-[10px] text-slate-500 mt-1" title="Firebase UID">UID: <code>${school.uid}</code></div>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="text-sm font-bold text-slate-700">$${parseFloat(school.amount).toFixed(2)} <span class="font-normal text-slate-500 text-xs">/${school.period}</span></div>
-                        <div class="text-xs ${isExpired?'text-red-500 font-bold':'text-slate-500'} mt-1 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${school.startDate} a ${school.endDate}</div>
+                        <div class="text-sm font-bold text-slate-700">$${parseFloat(school.amount).toFixed(2)}</div>
+                        <div class="text-xs ${isExpired ? 'text-red-500 font-bold' : 'text-slate-500'} mt-1">
+                            ${school.startDate} a ${school.endDate}
+                        </div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${st.color}">
                             <i data-lucide="${st.icon}" class="w-3.5 h-3.5"></i> ${st.label}
                         </span>
-                        ${isExpired ? '<div class="text-[10px] text-red-500 mt-1 font-bold animate-pulse">¡Suscripción Vencida!</div>' : ''}
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <select onchange="requestStatusChange('${school.id}', this.value)" class="text-sm border border-slate-300 rounded-md py-1.5 px-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="" disabled selected>Cambiar estado...</option>
-                            <option value="activo" ${school.status==='activo'?'disabled':''}>Marcar Activo</option>
-                            <option value="moroso" ${school.status==='moroso'?'disabled':''}>Marcar Moroso</option>
-                            <option value="mantenimiento" ${school.status==='mantenimiento'?'disabled':''}>Modo Mantenimiento</option>
-                            <option value="bloqueado" ${school.status==='bloqueado'?'disabled':''} class="text-red-600 font-medium">Bloquear Acceso</option>
-                        </select>
+                        <div class="flex items-center justify-end gap-2">
+                            <select onchange="requestStatusChange('${school.id}', this.value)" class="text-sm border border-slate-300 rounded-md py-1.5 px-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="" disabled selected>Acción...</option>
+                                <option value="activo" ${school.status === 'activo' ? 'disabled' : ''}>Habilitar</option>
+                                <option value="moroso" ${school.status === 'moroso' ? 'disabled' : ''}>Alerta Moroso</option>
+                                <option value="bloqueado" ${school.status === 'bloqueado' ? 'disabled' : ''} class="text-red-600 font-bold">Bloquear (UID y URL)</option>
+                            </select>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
-
             lucide.createIcons();
             updateStats();
         }
 
-        function filtrarTablaEscuelas() {
-            renderSchoolsTable(document.getElementById('searchInput').value);
-        }
+        function filtrarTablaEscuelas() { renderSchoolsTable(document.getElementById('searchInput').value); }
 
-        // --------------------------------------------------------------------
-        // ----------- 6️⃣ MODAL PARA NUEVA ESCUELA -------------------------
-        // --------------------------------------------------------------------
+        // ============================================
+        // CREACIÓN ATÓMICA DE TENANT Y ESPACIO VACÍO
+        // ============================================
         function openAddSchoolModal() {
-            const modal   = document.getElementById('addSchoolModal');
+            const modal = document.getElementById('addSchoolModal');
             const content = document.getElementById('addSchoolModalContent');
-
-            // Valores por defecto (puedes editarlos a mano)
-            document.getElementById('schoolId').value   = "";
-            document.getElementById('schoolName').value = "";
-            document.getElementById('schoolUrl').value  = "";
-            document.getElementById('schoolRep').value  = "";
-            document.getElementById('schoolEmail').value= "";
-            document.getElementById('schoolUid').value  = "";
-
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('scale-95','opacity-0');
-                content.classList.add('scale-100','opacity-100');
-            },10);
+            setTimeout(() => { content.classList.remove('scale-95', 'opacity-0'); content.classList.add('scale-100', 'opacity-100'); }, 10);
         }
 
         function closeAddSchoolModal() {
-            const modal   = document.getElementById('addSchoolModal');
+            const modal = document.getElementById('addSchoolModal');
             const content = document.getElementById('addSchoolModalContent');
-            content.classList.remove('scale-100','opacity-100');
-            content.classList.add('scale-95','opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                document.getElementById('addSchoolForm').reset();
-            },300);
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); document.getElementById('addSchoolForm').reset(); }, 300);
         }
 
-        // --------------------------------------------------------------------
-        // ----------- 7️⃣ GUARDAR NUEVA ESCUELA ---------------------------
-        // --------------------------------------------------------------------
         function submitNewSchool(e) {
             e.preventDefault();
             const schoolId = document.getElementById('schoolId').value.trim();
-            if (!schoolId) { alert('Debe proporcionar un ID de Tenant'); return; }
+            if(!schoolId || schoolId.includes(' ')) return alert("ID inválido. No debe contener espacios.");
 
             const newSchoolData = {
-                name:        document.getElementById('schoolName').value,
-                url:         document.getElementById('schoolUrl').value,
-                adminName:   document.getElementById('schoolRep').value,
-                adminEmail:  document.getElementById('schoolEmail').value,
-                adminUid:    document.getElementById('schoolUid').value,
-                amount:      parseFloat(document.getElementById('schoolAmount').value),
-                period:      document.getElementById('schoolPeriod').value,
-                startDate:   document.getElementById('schoolStart').value,
-                endDate:     document.getElementById('schoolEnd').value,
-                status:      'activo',
-                createdAt:   new Date().toISOString()
+                name: document.getElementById('schoolName').value,
+                url: document.getElementById('schoolUrl').value,
+                adminName: document.getElementById('schoolRep').value,
+                adminEmail: document.getElementById('schoolEmail').value,
+                adminUid: document.getElementById('schoolUid').value,
+                amount: parseFloat(document.getElementById('schoolAmount').value),
+                period: document.getElementById('schoolPeriod').value,
+                startDate: document.getElementById('schoolStart').value,
+                endDate: document.getElementById('schoolEnd').value,
+                status: 'activo',
+                createdAt: new Date().toISOString()
             };
-
-            // Escritura simultánea del nodo público y del nodo privado (vacío)
-            Promise.all([
-                database.ref('tenants/' + schoolId).set(newSchoolData),
-                initializeTenantDatabase(schoolId)
-            ]).then(() => {
-                closeAddSchoolModal();            // el listener refresca la tabla
-            }).catch(err => {
-                alert('Error al crear la escuela: ' + err.message);
-            });
+            
+            // OPERACIÓN ATÓMICA: Crea el perfil en SaaS y un nodo vacío preparado para el CSV del cliente
+            const updates = {};
+            updates[`tenants/${schoolId}`] = newSchoolData;
+            updates[`tenant_data/${schoolId}/_metadata/initialized`] = false; // Bandera para que el cliente pida el CSV al iniciar
+            
+            database.ref().update(updates)
+                .then(() => closeAddSchoolModal())
+                .catch(err => alert("Error DB: " + err.message));
         }
 
-        // --------------------------------------------------------------------
-        // ----------- 8️⃣ SOLICITAR CAMBIO DE ESTADO -----------------------
-        // --------------------------------------------------------------------
+        // ============================================
+        // LÓGICA DE BLOQUEO ATÓMICO (URL + UID)
+        // ============================================
         function requestStatusChange(schoolId, newStatus) {
             const school = schools.find(s => s.id === schoolId);
-            if (!school) return;
-            pendingStatusChange = {schoolId, newStatus};
-
+            pendingStatusChange = { school, newStatus };
+            
             const modalText = document.getElementById('modalText');
-            if (newStatus === 'bloqueado') {
-                modalText.innerHTML = `⚠️ Vas a <b>bloquear</b> el acceso a la base de datos de <span class="text-red-600 font-bold">${school.name}</span>.`;
-            } else if (newStatus === 'mantenimiento') {
-                modalText.innerHTML = `El sitio de <b>${school.name}</b> entrará en modo <i>mantenimiento</i>.`;
-            } else if (newStatus === 'moroso') {
-                modalText.innerHTML = `El sitio de <b>${school.name}</b> mostrará una alerta de <i>pago pendiente</i>.`;
+            const techActions = document.getElementById('technicalActions');
+            
+            if(newStatus === 'bloqueado') {
+                modalText.innerHTML = `Bloquearás a <span class="text-red-600 font-bold">${school.name}</span>. Esto cortará todo el acceso.`;
+                techActions.innerHTML = `
+                    &gt; UPDATE tenants/${schoolId}/status = 'bloqueado'<br>
+                    &gt; SET banned_uids/${school.uid} = true<br>
+                    &gt; SET blocked_urls/${btoa(school.url)} = true
+                `;
             } else {
-                modalText.innerHTML = `El sitio de <b>${school.name}</b> volverá a estar <i>activo</i>.`;
+                modalText.innerHTML = `Restaurarás el acceso de <b>${school.name}</b>.`;
+                techActions.innerHTML = `
+                    &gt; UPDATE tenants/${schoolId}/status = '${newStatus}'<br>
+                    &gt; DELETE banned_uids/${school.uid}<br>
+                    &gt; DELETE blocked_urls/${btoa(school.url)}
+                `;
             }
 
-            const modal        = document.getElementById('statusModal');
+            const modal = document.getElementById('statusModal');
             const modalContent = document.getElementById('modalContent');
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                modalContent.classList.remove('scale-95','opacity-0');
-                modalContent.classList.add('scale-100','opacity-100');
-            },10);
+            setTimeout(() => { modalContent.classList.remove('scale-95', 'opacity-0'); modalContent.classList.add('scale-100', 'opacity-100'); }, 10);
         }
-
-        // --------------------------------------------------------------------
-        // ----------- 9️⃣ CONFIRMAR CAMBIO (botón) -------------------------
-        // --------------------------------------------------------------------
-        document.getElementById('confirmStatusBtn').addEventListener('click', () => {
-            if (!pendingStatusChange) return;
-            const {schoolId,newStatus} = pendingStatusChange;
-            applyStatusChange(schoolId,newStatus)
-                .then(() => closeModal())
-                .catch(err => {
-                    alert('Error al cambiar el estado: ' + err.message);
-                    closeModal();
-                });
-        });
 
         function closeModal() {
-            const modal        = document.getElementById('statusModal');
+            const modal = document.getElementById('statusModal');
             const modalContent = document.getElementById('modalContent');
-            modalContent.classList.remove('scale-100','opacity-100');
-            modalContent.classList.add('scale-95','opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                pendingStatusChange = null;
-                renderSchoolsTable(document.getElementById('searchInput').value);
-            },300);
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { 
+                modal.classList.add('hidden'); 
+                pendingStatusChange = null; 
+                renderSchoolsTable(document.getElementById('searchInput').value); 
+            }, 300);
         }
 
-        // --------------------------------------------------------------------
-        // ----------- 10️⃣ IMPORTAR CSV (esqueleto – se completará después) ---
-        // --------------------------------------------------------------------
-        // La idea: desde la UI del propio tenant el director podrá subir un CSV.
-        // Cada fila del CSV se guardará dentro de: tenantDB/{tenantId}/records/<key>
-        // Aquí sólo dejamos una función utilitaria que podrá llamarse desde el
-        // front‑end del tenant cuando estés listo.
-        function uploadCSVToTenant(tenantId, csvText) {
-            // Convierte CSV → array de objetos (muy simple, sin librerías)
-            const lines = csvText.trim().split('\n');
-            const header = lines.shift().split(',').map(h=>h.trim());
-            const updates = {};
-            lines.forEach((line, idx) => {
-                const values = line.split(',').map(v=>v.trim());
-                const record = {};
-                header.forEach((h,i) => record[h] = values[i] ?? '');
-                // Cada registro se guarda bajo un ID arbitrario (timestamp + idx)
-                const recId = Date.now() + '_' + idx;
-                updates[`records/${recId}`] = record;
-            });
-            return database.ref(`tenantDB/${tenantId}`).update(updates);
-        }
+        document.getElementById('confirmStatusBtn').addEventListener('click', () => {
+            if(pendingStatusChange) {
+                const { school, newStatus } = pendingStatusChange;
+                const safeUrl = btoa(school.url); // Base64 para usar URLs como llaves de Firebase
+
+                // OPERACIÓN MULTI-PATH ATÓMICA
+                const updates = {};
+                updates[`tenants/${school.id}/status`] = newStatus;
+                updates[`tenants/${school.id}/lastStatusChange`] = new Date().toISOString();
+
+                if (newStatus === 'bloqueado') {
+                    // BLOQUEO EFECTIVO: El UID pasa a lista negra y la URL se marca como inhabilitada
+                    updates[`banned_uids/${school.uid}`] = true;
+                    updates[`blocked_urls/${safeUrl}`] = true;
+                } else {
+                    // RESTAURACIÓN
+                    updates[`banned_uids/${school.uid}`] = null;
+                    updates[`blocked_urls/${safeUrl}`] = null;
+                }
+                
+                database.ref().update(updates).then(() => closeModal()).catch((err) => {
+                    alert("Error en transacción atómica: " + err.message);
+                    closeModal();
+                });
+            }
+        });
+
     </script>
 </body>
 </html>
