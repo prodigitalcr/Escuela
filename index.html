@@ -11,12 +11,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-    // Coloca esto al inicio de tus scripts para capturar fallos en el celular
-window.onerror = function(message, source, lineno, colno, error) {
-    alert("🚨 ERROR DETECTADO EN CELULAR:\n" + message + "\nEn línea: " + lineno);
-    return false;
-};
     
     <!-- Face-API.js (Reconocimiento Facial) -->
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
@@ -605,6 +599,11 @@ window.onerror = function(message, source, lineno, colno, error) {
     </div>
 
     <script>
+        // Coloca esto al inicio de tus scripts para capturar fallos en el celular
+window.onerror = function(message, source, lineno, colno, error) {
+    alert("🚨 ERROR DETECTADO EN CELULAR:\n" + message + "\nEn línea: " + lineno);
+    return false;
+};
         // ============================================
         // CONFIGURACIÓN FIREBASE (Con tus credenciales y reglas)
         // ============================================
